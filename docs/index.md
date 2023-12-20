@@ -11,10 +11,7 @@
     * [1.3 Data Quality Assessment](#1.3)
     * [1.4 Data Preprocessing](#1.4)
         * [1.4.1 Image Description](#1.4.1)
-        * [1.4.2 Image Normalization](#1.4.2)
-        * [1.4.3 Image Reshaping](#1.4.3)
-        * [1.4.4 Image Augmentation](#1.4.4)
-        * [1.4.5 Preprocessed Data Description](#1.4.5)
+        * [1.4.2 Image Augmentation](#1.4.2)
     * [1.5 Data Exploration](#1.5)
         * [1.5.1 Exploratory Data Analysis](#1.5.1)
     * [1.6 Model Development](#1.6)
@@ -891,7 +888,7 @@ display(image.min())
     10
 
 
-### 1.4.2 Image Normalization <a class="anchor" id="1.4.2"></a>
+### 1.4.2 Image Augmentation <a class="anchor" id="1.4.2"></a>
 
 1. Details
     * 1.1 Details
@@ -901,51 +898,122 @@ display(image.min())
 
 ```python
 ##################################
-# Update
+# Identifying the path for the images
+# and defining image categories 
 ##################################
+path = 'C:/Users/John pauline magno/Python Notebooks/COVID-19_Radiography_Dataset'
+classes=["COVID", "Normal", "Viral Pneumonia"]
+num_classes = len(classes)
+batch_size = 16
 ```
-
-### 1.4.3 Image Reshaping <a class="anchor" id="1.4.3"></a>
-
-1. Details
-    * 1.1 Details
-        * 1.1.1 Details
-            * 1.1.1.1 Details
 
 
 ```python
 ##################################
-# Update
+# Creating subsets of images
+# for model training and
+# setting the parameters for
+# real-time data augmentation
+# at each epoch
 ##################################
+set_seed()
+train_datagen = ImageDataGenerator(rescale=1./255,
+                                   rotation_range=20,
+                                   width_shift_range=0.2,
+                                   height_shift_range=0.2,
+                                   horizontal_flip=True,
+                                   validation_split=0.2)
+
+
+##################################
+# Loading the model training images
+##################################
+train_gen = train_datagen.flow_from_directory(directory=path, 
+                                              target_size=(299, 299),
+                                              class_mode='categorical',
+                                              subset='training',
+                                              shuffle=True, 
+                                              classes=classes,
+                                              batch_size=batch_size, 
+                                              color_mode="grayscale")
 ```
 
-### 1.4.4 Image Augmentation <a class="anchor" id="1.4.4"></a>
-
-1. Details
-    * 1.1 Details
-        * 1.1.1 Details
-            * 1.1.1.1 Details
+    Found 2880 images belonging to 3 classes.
+    
 
 
 ```python
 ##################################
-# Update
+# Loading samples of augmented images
+# for the training set
 ##################################
+fig, axes = plt.subplots(1, 5, figsize=(15, 3))
+
+for i in range(5):
+    batch = next(train_gen)
+    images, labels = batch
+    axes[i].imshow(images[0])  # Display the first image in the batch
+    axes[i].set_title(f"Label: {labels[0]}")
+    axes[i].axis('off')
+plt.show()
 ```
 
-### 1.4.5 Preprocessed Data Description <a class="anchor" id="1.4.5"></a>
 
-1. Details
-    * 1.1 Details
-        * 1.1.1 Details
-            * 1.1.1.1 Details
+    
+![png](output_44_0.png)
+    
+
 
 
 ```python
 ##################################
-# Update
+# Creating subsets of images
+# for model validation
+# setting the parameters for
+# real-time data augmentation
+# at each epoch
 ##################################
+set_seed()
+test_datagen = ImageDataGenerator(rescale=1./255, 
+                                  validation_split=0.2)
+
+##################################
+# Loading the model evaluation images
+##################################
+test_gen = test_datagen.flow_from_directory(directory=path, 
+                                              target_size=(299, 299),
+                                              class_mode='categorical',
+                                              subset='validation',
+                                              shuffle=False, classes=classes,
+                                              batch_size=batch_size, 
+                                              color_mode="grayscale")
 ```
+
+    Found 720 images belonging to 3 classes.
+    
+
+
+```python
+##################################
+# Loading samples of augmented images
+# for the validation set
+##################################
+fig, axes = plt.subplots(1, 5, figsize=(15, 3))
+
+for i in range(5):
+    batch = next(test_gen)
+    images, labels = batch
+    axes[i].imshow(images[0])
+    axes[i].set_title(f"Label: {labels[0]}")
+    axes[i].axis('off')
+plt.show()
+```
+
+
+    
+![png](output_46_0.png)
+    
+
 
 ## 1.5. Data Exploration <a class="anchor" id="1.5"></a>
 
@@ -959,14 +1027,15 @@ display(image.min())
 
 ```python
 ##################################
-# Update
+# Consolidating summary statistics
+# for the image pixel values
 ##################################
 mean_val = []
 std_dev_val = []
 max_val = []
 min_val = []
 
-for i in range(0,samples):
+for i in range(0, samples):
     mean_val.append(xray_images['Image'][i].mean())
     std_dev_val.append(np.std(xray_images['Image'][i]))
     max_val.append(xray_images['Image'][i].max())
@@ -977,24 +1046,48 @@ imageEDA['Mean'] = mean_val
 imageEDA['StDev'] = std_dev_val
 imageEDA['Max'] = max_val
 imageEDA['Min'] = min_val
-
-subt_mean_samples = imageEDA['Mean'].mean() - imageEDA['Mean']
-imageEDA['Subt_Mean'] = subt_mean_samples
 ```
 
 
 ```python
 ##################################
-# Update
+# Formulating the mean distribution
+# by category of the image pixel values
 ##################################
-ax = sns.displot(data = imageEDA, x = 'Mean', kind="kde");
-plt.title('Images Colour Mean Value Distribution', fontsize = 16,weight = 'bold');
-ax = sns.displot(data = imageEDA, x = 'Mean', kind="kde", hue = 'Class');
-plt.title('Images Colour Mean Value Distribution by Class', fontsize = 16,weight = 'bold');
-ax = sns.displot(data = imageEDA, x = 'Max', kind="kde", hue = 'Class');
-plt.title('Images Colour Max Value Distribution by Class', fontsize = 16,weight = 'bold');
-ax = sns.displot(data = imageEDA, x = 'Min', kind="kde", hue = 'Class');
-plt.title('Images Colour Min Value Distribution by Class', fontsize = 16,weight = 'bold');
+sns.displot(data = imageEDA, x = 'Mean', kind="kde", hue = 'Class', height=6, aspect=1.40)
+plt.title('Image Pixel Mean Distribution by Category', fontsize=14, weight='bold');
+```
+
+
+    
+![png](output_50_0.png)
+    
+
+
+
+```python
+##################################
+# Formulating the maximum distribution
+# by category of the image pixel values
+##################################
+sns.displot(data = imageEDA, x = 'Max', kind="kde", hue = 'Class', height=6, aspect=1.40)
+plt.title('Image Pixel Maximum Distribution by Category', fontsize=14, weight='bold');
+```
+
+
+    
+![png](output_51_0.png)
+    
+
+
+
+```python
+##################################
+# Formulating the minimum distribution
+# by category of the image pixel values
+##################################
+sns.displot(data = imageEDA, x = 'Min', kind="kde", hue = 'Class', height=6, aspect=1.40)
+plt.title('Image Pixel Minimum Distribution by Category', fontsize=14, weight='bold');
 ```
 
 
@@ -1004,33 +1097,13 @@ plt.title('Images Colour Min Value Distribution by Class', fontsize = 16,weight 
 
 
 
-    
-![png](output_52_1.png)
-    
-
-
-
-    
-![png](output_52_2.png)
-    
-
-
-
-    
-![png](output_52_3.png)
-    
-
-
-
 ```python
-plt.figure(figsize=(20,8))
-sns.set(style="ticks", font_scale = 1)
-ax = sns.scatterplot(data=imageEDA, x="Mean", y=imageEDA['StDev'], hue = 'Class',alpha=0.8);
-sns.despine(top=True, right=True, left=False, bottom=False)
-plt.xticks(rotation=0,fontsize = 12)
-ax.set_xlabel('Image Channel Colour Mean',fontsize = 14,weight = 'bold')
-ax.set_ylabel('Image Channel Colour Standard Deviation',fontsize = 14,weight = 'bold')
-plt.title('Mean and Standard Deviation of Image Samples', fontsize = 16,weight = 'bold');
+##################################
+# Formulating the standard deviation distribution
+# by category of the image pixel values
+##################################
+sns.displot(data = imageEDA, x = 'StDev', kind="kde", hue = 'Class', height=6, aspect=1.40)
+plt.title('Image Pixel Standard Deviation Distribution by Category', fontsize=14, weight='bold');
 ```
 
 
@@ -1041,31 +1114,60 @@ plt.title('Mean and Standard Deviation of Image Samples', fontsize = 16,weight =
 
 
 ```python
-plt.figure(figsize=(20,8));
-g = sns.FacetGrid(imageEDA, col="Class",height=5);
-g.map_dataframe(sns.scatterplot, x='Mean', y='StDev');
-g.set_titles(col_template="{col_name}", row_template="{row_name}", size = 16)
-g.fig.subplots_adjust(top=.7)
-g.fig.suptitle('Mean and Standard Deviation of Image Samples',fontsize=16, weight = 'bold')
-axes = g.axes.flatten()
-axes[0].set_ylabel('Standard Deviation');
-for ax in axes:
-    ax.set_xlabel('Mean')
-g.fig.tight_layout()
+##################################
+# Formulating the mean and standard deviation 
+# scatterplot distribution
+# by category of the image pixel values
+##################################
+plt.figure(figsize=(10,6))
+sns.set(style="ticks", font_scale = 1)
+ax = sns.scatterplot(data=imageEDA, x="Mean", y=imageEDA['StDev'], hue='Class', alpha=0.5)
+sns.despine(top=True, right=True, left=False, bottom=False)
+plt.xticks(rotation=0, fontsize = 12)
+ax.set_xlabel('Image Pixel Mean',fontsize=14, weight='bold')
+ax.set_ylabel('Image Pixel Standard Deviation', fontsize=14, weight='bold')
+plt.title('Image Pixel Mean and Standard Deviation Distribution', fontsize = 14, weight='bold');
 ```
 
 
-    <Figure size 2000x800 with 0 Axes>
-
-
-
     
-![png](output_54_1.png)
+![png](output_54_0.png)
     
 
 
 
 ```python
+##################################
+# Formulating the mean and standard deviation 
+# scatterplot distribution
+# by category of the image pixel values
+##################################
+scatterplot = sns.FacetGrid(imageEDA, col="Class", height=6)
+scatterplot.map_dataframe(sns.scatterplot, x='Mean', y='StDev', alpha=0.5)
+scatterplot.set_titles(col_template="{col_name}", row_template="{row_name}", size=18)
+scatterplot.fig.subplots_adjust(top=.8)
+scatterplot.fig.suptitle('Image Pixel Mean and Standard Deviation Distribution', fontsize=14, weight='bold')
+axes = scatterplot.axes.flatten()
+axes[0].set_ylabel('Image Pixel Standard Deviation')
+for ax in axes:
+    ax.set_xlabel('Image Pixel Mean')
+scatterplot.fig.tight_layout()
+```
+
+
+    
+![png](output_55_0.png)
+    
+
+
+
+```python
+##################################
+# Formulating the mean and standard deviation 
+# scatterplot distribution
+# of the image pixel values
+# represented as actual images
+##################################
 def getImage(path):
     return OffsetImage(cv2.imread(path),zoom = 0.1)
 
@@ -1075,9 +1177,9 @@ paths = DF_sample['Path']
 fig, ax = plt.subplots(figsize=(20,8))
 ab = sns.scatterplot(data=DF_sample, x="Mean", y='StDev')
 sns.despine(top=True, right=True, left=False, bottom=False)
-ax.set_xlabel('Image Channel Colour Mean',fontsize = 14,weight = 'bold')
-ax.set_ylabel('Image Channel Colour Standard Deviation',fontsize = 14,weight = 'bold')
-plt.title('Mean and Standard Deviation of Image Samples', fontsize = 16,weight = 'bold');
+ax.set_xlabel('Image Pixel Mean', fontsize=14, weight='bold')
+ax.set_ylabel('Image Pixel Standard Deviation', fontsize=14, weight='bold')
+plt.title('Image Pixel Mean and Standard Deviation Distribution', fontsize=14, weight='bold');
 
 for x0, y0, path in zip(DF_sample['Mean'], DF_sample['StDev'],paths):
     ab = AnnotationBbox(getImage(path), (x0, y0), frameon=False)
@@ -1086,7 +1188,7 @@ for x0, y0, path in zip(DF_sample['Mean'], DF_sample['StDev'],paths):
 
 
     
-![png](output_55_0.png)
+![png](output_56_0.png)
     
 
 
@@ -1099,59 +1201,20 @@ for x0, y0, path in zip(DF_sample['Mean'], DF_sample['StDev'],paths):
         * 1.1.1 Details
             * 1.1.1.1 Details
 
+### 1.6.2 CNN With No Regularization <a class="anchor" id="1.6.2"></a>
 
-```python
-##################################
-# Update
-##################################
-#add the path general where the classes subpath are allocated
-path = 'C:/Users/John pauline magno/Python Notebooks/COVID-19_Radiography_Dataset'
-
-classes=["COVID", "Normal", "Viral Pneumonia"]
-num_classes = len(classes)
-batch_size = 16
-
-set_seed()
-
-#Define the parameters to create the training and validation set Images and Data Augmentation parameters
-train_datagen = ImageDataGenerator(rescale=1./255,
-                                   rotation_range=20,
-                                   width_shift_range=0.2,
-                                   height_shift_range=0.2,
-                                   horizontal_flip=True,
-                                   validation_split=0.2)
-
-set_seed()
-
-#**No Augmentation on the Test set Images**
-test_datagen = ImageDataGenerator(rescale=1./255, 
-                                  validation_split=0.2)
-
-
-#loading the images to training set
-train_gen = train_datagen.flow_from_directory(directory=path, 
-                                              target_size=(299, 299),
-                                              class_mode='categorical',
-                                              subset='training',
-                                              shuffle=True, classes=classes,
-                                              batch_size=batch_size, 
-                                              color_mode="grayscale")
-#loading the images to test set
-test_gen = test_datagen.flow_from_directory(directory=path, 
-                                              target_size=(299, 299),
-                                              class_mode='categorical',
-                                              subset='validation',
-                                              shuffle=False, classes=classes,
-                                              batch_size=batch_size, 
-                                              color_mode="grayscale")
-```
-
-    Found 2880 images belonging to 3 classes.
-    Found 720 images belonging to 3 classes.
-    
+1. Details
+    * 1.1 Details
+        * 1.1.1 Details
+            * 1.1.1.1 Details
 
 
 ```python
+##################################
+# Defining a function for
+# plotting the loss profile
+# of the training and validation sets
+#################################
 def plot_training_history(history, model_name):
     plt.figure(figsize=(10,6))
     plt.plot(history.history['loss'], label='Train')
@@ -1163,13 +1226,6 @@ def plot_training_history(history, model_name):
     plt.legend()
     plt.show()
 ```
-
-### 1.6.2 CNN With No Regularization <a class="anchor" id="1.6.2"></a>
-
-1. Details
-    * 1.1 Details
-        * 1.1.1 Details
-            * 1.1.1.1 Details
 
 
 ```python
@@ -1205,6 +1261,103 @@ model_nr.compile(loss='categorical_crossentropy', optimizer='adam', metrics=[Rec
 
 ```python
 ##################################
+# Displaying the model summary
+# for CNN with no regularization
+##################################
+print(model_nr.summary())
+```
+
+    Model: "sequential"
+    _________________________________________________________________
+     Layer (type)                Output Shape              Param #   
+    =================================================================
+     conv2d (Conv2D)             (None, 299, 299, 32)      320       
+                                                                     
+     max_pooling2d (MaxPooling2D  (None, 149, 149, 32)     0         
+     )                                                               
+                                                                     
+     conv2d_1 (Conv2D)           (None, 149, 149, 64)      18496     
+                                                                     
+     max_pooling2d_1 (MaxPooling  (None, 74, 74, 64)       0         
+     2D)                                                             
+                                                                     
+     flatten (Flatten)           (None, 350464)            0         
+                                                                     
+     dense (Dense)               (None, 128)               44859520  
+                                                                     
+     dense_1 (Dense)             (None, 3)                 387       
+                                                                     
+    =================================================================
+    Total params: 44,878,723
+    Trainable params: 44,878,723
+    Non-trainable params: 0
+    _________________________________________________________________
+    None
+    
+
+
+```python
+##################################
+# Displaying the model layers
+# for CNN with no regularization
+##################################
+model_nr_layer_names = [layer.name for layer in model_nr.layers]
+print("Layer Names:", model_nr_layer_names)
+```
+
+    Layer Names: ['conv2d', 'max_pooling2d', 'conv2d_1', 'max_pooling2d_1', 'flatten', 'dense', 'dense_1']
+    
+
+
+```python
+##################################
+# Displaying the number of weights
+# for each model layer
+# for CNN with no regularization
+##################################
+for layer in model_nr.layers:
+    if hasattr(layer, 'weights'):
+        print(f"Layer: {layer.name}, Number of Weights: {len(layer.get_weights())}")
+```
+
+    Layer: conv2d, Number of Weights: 2
+    Layer: max_pooling2d, Number of Weights: 0
+    Layer: conv2d_1, Number of Weights: 2
+    Layer: max_pooling2d_1, Number of Weights: 0
+    Layer: flatten, Number of Weights: 0
+    Layer: dense, Number of Weights: 2
+    Layer: dense_1, Number of Weights: 2
+    
+
+
+```python
+##################################
+# Displaying the number of weights
+# for each model layer
+# for CNN with no regularization
+##################################
+total_parameters = 0
+for layer in model_nr.layers:
+    layer_parameters = layer.count_params()
+    total_parameters += layer_parameters
+    print(f"Layer: {layer.name}, Parameters: {layer_parameters}")
+print("\nTotal Parameters in the Model:", total_parameters)
+```
+
+    Layer: conv2d, Parameters: 320
+    Layer: max_pooling2d, Parameters: 0
+    Layer: conv2d_1, Parameters: 18496
+    Layer: max_pooling2d_1, Parameters: 0
+    Layer: flatten, Parameters: 0
+    Layer: dense, Parameters: 44859520
+    Layer: dense_1, Parameters: 387
+    
+    Total Parameters in the Model: 44878723
+    
+
+
+```python
+##################################
 # Fitting the model
 # for CNN with no regularization
 ##################################
@@ -1232,7 +1385,7 @@ model_nr_history = model_nr.fit(train_gen,
 model_nr_y_pred = model_nr.predict(test_gen)
 ```
 
-    45/45 [==============================] - 4s 76ms/step
+    45/45 [==============================] - 3s 75ms/step
     
 
 
@@ -1247,7 +1400,7 @@ plot_training_history(model_nr_history, 'CNN With No Regularization : ')
 
 
     
-![png](output_64_0.png)
+![png](output_68_0.png)
     
 
 
@@ -1289,7 +1442,7 @@ keras.backend.clear_session()
 
 
     
-![png](output_65_0.png)
+![png](output_69_0.png)
     
 
 
@@ -1359,30 +1512,30 @@ model_nr_all_df
   <tbody>
     <tr>
       <th>COVID</th>
-      <td>0.921739</td>
-      <td>0.883333</td>
-      <td>0.902128</td>
+      <td>0.954545</td>
+      <td>0.875000</td>
+      <td>0.913043</td>
       <td>240.0</td>
     </tr>
     <tr>
       <th>Normal</th>
-      <td>0.905213</td>
-      <td>0.795833</td>
-      <td>0.847007</td>
+      <td>0.909091</td>
+      <td>0.875000</td>
+      <td>0.891720</td>
       <td>240.0</td>
     </tr>
     <tr>
       <th>Viral Pneumonia</th>
-      <td>0.795699</td>
+      <td>0.825279</td>
       <td>0.925000</td>
-      <td>0.855491</td>
+      <td>0.872299</td>
       <td>240.0</td>
     </tr>
     <tr>
       <th>Total</th>
-      <td>0.874217</td>
-      <td>0.868056</td>
-      <td>0.868209</td>
+      <td>0.896305</td>
+      <td>0.891667</td>
+      <td>0.892354</td>
       <td>NaN</td>
     </tr>
   </tbody>
@@ -1427,6 +1580,115 @@ model_dr.compile(loss='categorical_crossentropy', optimizer='adam', metrics=[Rec
 
 ```python
 ##################################
+# Displaying the model summary
+# for CNN with dropout regularization
+##################################
+print(model_dr.summary())
+```
+
+    Model: "sequential"
+    _________________________________________________________________
+     Layer (type)                Output Shape              Param #   
+    =================================================================
+     conv2d (Conv2D)             (None, 299, 299, 32)      320       
+                                                                     
+     max_pooling2d (MaxPooling2D  (None, 149, 149, 32)     0         
+     )                                                               
+                                                                     
+     dropout (Dropout)           (None, 149, 149, 32)      0         
+                                                                     
+     conv2d_1 (Conv2D)           (None, 149, 149, 64)      18496     
+                                                                     
+     max_pooling2d_1 (MaxPooling  (None, 74, 74, 64)       0         
+     2D)                                                             
+                                                                     
+     dropout_1 (Dropout)         (None, 74, 74, 64)        0         
+                                                                     
+     flatten (Flatten)           (None, 350464)            0         
+                                                                     
+     dense (Dense)               (None, 128)               44859520  
+                                                                     
+     dropout_2 (Dropout)         (None, 128)               0         
+                                                                     
+     dense_1 (Dense)             (None, 3)                 387       
+                                                                     
+    =================================================================
+    Total params: 44,878,723
+    Trainable params: 44,878,723
+    Non-trainable params: 0
+    _________________________________________________________________
+    None
+    
+
+
+```python
+##################################
+# Displaying the model layers
+# for CNN with dropout regularization
+##################################
+model_dr_layer_names = [layer.name for layer in model_dr.layers]
+print("Layer Names:", model_dr_layer_names)
+```
+
+    Layer Names: ['conv2d', 'max_pooling2d', 'dropout', 'conv2d_1', 'max_pooling2d_1', 'dropout_1', 'flatten', 'dense', 'dropout_2', 'dense_1']
+    
+
+
+```python
+##################################
+# Displaying the number of weights
+# for each model layer
+# for CNN with dropout regularization
+##################################
+for layer in model_dr.layers:
+    if hasattr(layer, 'weights'):
+        print(f"Layer: {layer.name}, Number of Weights: {len(layer.get_weights())}")
+```
+
+    Layer: conv2d, Number of Weights: 2
+    Layer: max_pooling2d, Number of Weights: 0
+    Layer: dropout, Number of Weights: 0
+    Layer: conv2d_1, Number of Weights: 2
+    Layer: max_pooling2d_1, Number of Weights: 0
+    Layer: dropout_1, Number of Weights: 0
+    Layer: flatten, Number of Weights: 0
+    Layer: dense, Number of Weights: 2
+    Layer: dropout_2, Number of Weights: 0
+    Layer: dense_1, Number of Weights: 2
+    
+
+
+```python
+##################################
+# Displaying the number of weights
+# for each model layer
+# for CNN with dropout regularization
+##################################
+total_parameters = 0
+for layer in model_dr.layers:
+    layer_parameters = layer.count_params()
+    total_parameters += layer_parameters
+    print(f"Layer: {layer.name}, Parameters: {layer_parameters}")
+print("\nTotal Parameters in the Model:", total_parameters)
+```
+
+    Layer: conv2d, Parameters: 320
+    Layer: max_pooling2d, Parameters: 0
+    Layer: dropout, Parameters: 0
+    Layer: conv2d_1, Parameters: 18496
+    Layer: max_pooling2d_1, Parameters: 0
+    Layer: dropout_1, Parameters: 0
+    Layer: flatten, Parameters: 0
+    Layer: dense, Parameters: 44859520
+    Layer: dropout_2, Parameters: 0
+    Layer: dense_1, Parameters: 387
+    
+    Total Parameters in the Model: 44878723
+    
+
+
+```python
+##################################
 # Fitting the model
 # for CNN with dropout regularization
 ##################################
@@ -1450,7 +1712,7 @@ model_dr_history = model_dr.fit(train_gen,
 model_dr_y_pred = model_dr.predict(test_gen)
 ```
 
-    45/45 [==============================] - 4s 96ms/step
+    45/45 [==============================] - 4s 95ms/step
     
 
 
@@ -1465,7 +1727,7 @@ plot_training_history(model_dr_history, 'CNN With Dropout Regularization : ')
 
 
     
-![png](output_71_0.png)
+![png](output_79_0.png)
     
 
 
@@ -1508,7 +1770,7 @@ keras.backend.clear_session()
 
 
     
-![png](output_72_0.png)
+![png](output_80_0.png)
     
 
 
@@ -1578,30 +1840,30 @@ model_dr_all_df
   <tbody>
     <tr>
       <th>COVID</th>
-      <td>0.898734</td>
-      <td>0.887500</td>
-      <td>0.893082</td>
+      <td>0.970297</td>
+      <td>0.816667</td>
+      <td>0.886878</td>
       <td>240.0</td>
     </tr>
     <tr>
       <th>Normal</th>
-      <td>0.882629</td>
-      <td>0.783333</td>
-      <td>0.830022</td>
+      <td>0.684366</td>
+      <td>0.966667</td>
+      <td>0.801382</td>
       <td>240.0</td>
     </tr>
     <tr>
       <th>Viral Pneumonia</th>
-      <td>0.829630</td>
-      <td>0.933333</td>
-      <td>0.878431</td>
+      <td>0.905028</td>
+      <td>0.675000</td>
+      <td>0.773270</td>
       <td>240.0</td>
     </tr>
     <tr>
       <th>Total</th>
-      <td>0.870331</td>
-      <td>0.868056</td>
-      <td>0.867178</td>
+      <td>0.853230</td>
+      <td>0.819444</td>
+      <td>0.820510</td>
       <td>NaN</td>
     </tr>
   </tbody>
@@ -1645,6 +1907,112 @@ model_bnr.compile(loss='categorical_crossentropy', optimizer='adam', metrics=[Re
 
 ```python
 ##################################
+# Displaying the model summary
+# for CNN with batch normalization regularization
+##################################
+print(model_bnr.summary())
+```
+
+    Model: "sequential"
+    _________________________________________________________________
+     Layer (type)                Output Shape              Param #   
+    =================================================================
+     conv2d (Conv2D)             (None, 299, 299, 32)      320       
+                                                                     
+     max_pooling2d (MaxPooling2D  (None, 149, 149, 32)     0         
+     )                                                               
+                                                                     
+     conv2d_1 (Conv2D)           (None, 149, 149, 64)      18496     
+                                                                     
+     batch_normalization (BatchN  (None, 149, 149, 64)     256       
+     ormalization)                                                   
+                                                                     
+     activation (Activation)     (None, 149, 149, 64)      0         
+                                                                     
+     max_pooling2d_1 (MaxPooling  (None, 74, 74, 64)       0         
+     2D)                                                             
+                                                                     
+     flatten (Flatten)           (None, 350464)            0         
+                                                                     
+     dense (Dense)               (None, 128)               44859520  
+                                                                     
+     dense_1 (Dense)             (None, 3)                 387       
+                                                                     
+    =================================================================
+    Total params: 44,878,979
+    Trainable params: 44,878,851
+    Non-trainable params: 128
+    _________________________________________________________________
+    None
+    
+
+
+```python
+##################################
+# Displaying the model layers
+# for CNN with batch normalization regularization
+##################################
+model_bnr_layer_names = [layer.name for layer in model_bnr.layers]
+print("Layer Names:", model_bnr_layer_names)
+```
+
+    Layer Names: ['conv2d', 'max_pooling2d', 'conv2d_1', 'batch_normalization', 'activation', 'max_pooling2d_1', 'flatten', 'dense', 'dense_1']
+    
+
+
+```python
+##################################
+# Displaying the number of weights
+# for each model layer
+# for CNN with batch normalization regularization
+##################################
+for layer in model_bnr.layers:
+    if hasattr(layer, 'weights'):
+        print(f"Layer: {layer.name}, Number of Weights: {len(layer.get_weights())}")
+```
+
+    Layer: conv2d, Number of Weights: 2
+    Layer: max_pooling2d, Number of Weights: 0
+    Layer: conv2d_1, Number of Weights: 2
+    Layer: batch_normalization, Number of Weights: 4
+    Layer: activation, Number of Weights: 0
+    Layer: max_pooling2d_1, Number of Weights: 0
+    Layer: flatten, Number of Weights: 0
+    Layer: dense, Number of Weights: 2
+    Layer: dense_1, Number of Weights: 2
+    
+
+
+```python
+##################################
+# Displaying the number of weights
+# for each model layer
+# for CNN with batch normalization regularization
+##################################
+total_parameters = 0
+for layer in model_bnr.layers:
+    layer_parameters = layer.count_params()
+    total_parameters += layer_parameters
+    print(f"Layer: {layer.name}, Parameters: {layer_parameters}")
+print("\nTotal Parameters in the Model:", total_parameters)
+```
+
+    Layer: conv2d, Parameters: 320
+    Layer: max_pooling2d, Parameters: 0
+    Layer: conv2d_1, Parameters: 18496
+    Layer: batch_normalization, Parameters: 256
+    Layer: activation, Parameters: 0
+    Layer: max_pooling2d_1, Parameters: 0
+    Layer: flatten, Parameters: 0
+    Layer: dense, Parameters: 44859520
+    Layer: dense_1, Parameters: 387
+    
+    Total Parameters in the Model: 44878979
+    
+
+
+```python
+##################################
 # Fitting the model
 # for CNN with batch normalization regularization
 ##################################
@@ -1667,7 +2035,7 @@ model_bnr_history = model_bnr.fit(train_gen,
 model_bnr_y_pred = model_bnr.predict(test_gen)
 ```
 
-    45/45 [==============================] - 4s 87ms/step
+    45/45 [==============================] - 4s 86ms/step
     
 
 
@@ -1682,7 +2050,7 @@ plot_training_history(model_bnr_history, 'CNN With Batch Normalization Regulariz
 
 
     
-![png](output_78_0.png)
+![png](output_90_0.png)
     
 
 
@@ -1725,7 +2093,7 @@ keras.backend.clear_session()
 
 
     
-![png](output_79_0.png)
+![png](output_91_0.png)
     
 
 
@@ -1863,6 +2231,118 @@ model_dr_bnr .compile(loss='categorical_crossentropy', optimizer='adam', metrics
 
 ```python
 ##################################
+# Displaying the model summary
+# for CNN with dropout and
+# batch normalization regularization
+##################################
+print(model_dr_bnr.summary())
+```
+
+    Model: "sequential"
+    _________________________________________________________________
+     Layer (type)                Output Shape              Param #   
+    =================================================================
+     conv2d (Conv2D)             (None, 299, 299, 32)      320       
+                                                                     
+     max_pooling2d (MaxPooling2D  (None, 149, 149, 32)     0         
+     )                                                               
+                                                                     
+     conv2d_1 (Conv2D)           (None, 149, 149, 64)      18496     
+                                                                     
+     batch_normalization (BatchN  (None, 149, 149, 64)     256       
+     ormalization)                                                   
+                                                                     
+     activation (Activation)     (None, 149, 149, 64)      0         
+                                                                     
+     dropout (Dropout)           (None, 149, 149, 64)      0         
+                                                                     
+     max_pooling2d_1 (MaxPooling  (None, 74, 74, 64)       0         
+     2D)                                                             
+                                                                     
+     flatten (Flatten)           (None, 350464)            0         
+                                                                     
+     dense (Dense)               (None, 128)               44859520  
+                                                                     
+     dense_1 (Dense)             (None, 3)                 387       
+                                                                     
+    =================================================================
+    Total params: 44,878,979
+    Trainable params: 44,878,851
+    Non-trainable params: 128
+    _________________________________________________________________
+    None
+    
+
+
+```python
+##################################
+# Displaying the model layers
+# for CNN with dropout and
+# batch normalization regularization
+##################################
+model_dr_bnr_layer_names = [layer.name for layer in model_dr_bnr.layers]
+print("Layer Names:", model_dr_bnr_layer_names)
+```
+
+    Layer Names: ['conv2d', 'max_pooling2d', 'conv2d_1', 'batch_normalization', 'activation', 'dropout', 'max_pooling2d_1', 'flatten', 'dense', 'dense_1']
+    
+
+
+```python
+##################################
+# Displaying the number of weights
+# for CNN with dropout and
+# batch normalization regularization
+##################################
+for layer in model_dr_bnr.layers:
+    if hasattr(layer, 'weights'):
+        print(f"Layer: {layer.name}, Number of Weights: {len(layer.get_weights())}")
+```
+
+    Layer: conv2d, Number of Weights: 2
+    Layer: max_pooling2d, Number of Weights: 0
+    Layer: conv2d_1, Number of Weights: 2
+    Layer: batch_normalization, Number of Weights: 4
+    Layer: activation, Number of Weights: 0
+    Layer: dropout, Number of Weights: 0
+    Layer: max_pooling2d_1, Number of Weights: 0
+    Layer: flatten, Number of Weights: 0
+    Layer: dense, Number of Weights: 2
+    Layer: dense_1, Number of Weights: 2
+    
+
+
+```python
+##################################
+# Displaying the number of weights
+# for CNN with dropout and
+# batch normalization regularization
+##################################
+total_parameters = 0
+for layer in model_dr_bnr.layers:
+    layer_parameters = layer.count_params()
+    total_parameters += layer_parameters
+    print(f"Layer: {layer.name}, Parameters: {layer_parameters}")
+print("\nTotal Parameters in the Model:", total_parameters)
+```
+
+    Layer: conv2d, Parameters: 320
+    Layer: max_pooling2d, Parameters: 0
+    Layer: conv2d_1, Parameters: 18496
+    Layer: batch_normalization, Parameters: 256
+    Layer: activation, Parameters: 0
+    Layer: dropout, Parameters: 0
+    Layer: max_pooling2d_1, Parameters: 0
+    Layer: flatten, Parameters: 0
+    Layer: dense, Parameters: 44859520
+    Layer: dense_1, Parameters: 387
+    
+    Total Parameters in the Model: 44878979
+    
+
+
+```python
+##################################
 # Fitting the model
 # for CNN with dropout and
 # batch normalization regularization
@@ -1888,7 +2368,7 @@ model_dr_bnr_history = model_dr_bnr.fit(train_gen,
 model_dr_bnr_y_pred = model_dr_bnr.predict(test_gen)
 ```
 
-    45/45 [==============================] - 4s 93ms/step
+    45/45 [==============================] - 4s 86ms/step
     
 
 
@@ -1904,7 +2384,7 @@ plot_training_history(model_dr_bnr_history, 'CNN With Dropout and Batch Normaliz
 
 
     
-![png](output_85_0.png)
+![png](output_101_0.png)
     
 
 
@@ -1950,7 +2430,7 @@ keras.backend.clear_session()
 
 
     
-![png](output_86_0.png)
+![png](output_102_0.png)
     
 
 
