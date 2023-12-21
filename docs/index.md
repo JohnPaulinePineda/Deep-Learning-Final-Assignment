@@ -62,10 +62,12 @@ The hierarchical representation of image features enables the network to transfo
 
 ## 1.2. Data Description <a class="anchor" id="1.2"></a>
 
-1. Details
-    * 1.1 Details
-        * 1.1.1 Details
-            * 1.1.1.1 Details
+1. The dataset is comprised of:
+    * **3600 images** (observations)
+    * **1 target** (variable)
+        * <span style="color: #FF0000">CLASS: COVID</span> = **1200 images**
+        * <span style="color: #FF0000">CLASS: Normal</span> = **1200 images**
+        * <span style="color: #FF0000">CLASS: Viral Pneumonia</span> = **1200 images**
 
 
 ```python
@@ -749,7 +751,7 @@ plt.axis('off')
 ##################################
 plt.subplot(1, 4, 4)
 plt.imshow(image[ : , : , 2])
-plt.title('Blue Channel', fontsize = 14, weight = 'bold')
+plt.title('Red Channel', fontsize = 14, weight = 'bold')
 plt.axis('off')
 
 ##################################
@@ -1389,7 +1391,7 @@ model_nr_history = model_nr.fit(train_gen,
 model_nr_y_pred = model_nr.predict(test_gen)
 ```
 
-    45/45 [==============================] - 3s 70ms/step
+    45/45 [==============================] - 4s 81ms/step
     
 
 
@@ -1416,7 +1418,7 @@ plot_training_history(model_nr_history, 'CNN With No Regularization : ')
 # on the validation set
 ##################################
 model_nr_predictions = np.array(list(map(lambda x: np.argmax(x), model_nr_y_pred)))
-model_nr_y_true=test_gen.classes
+model_nr_y_true = test_gen.classes
 
 ##################################
 # Formulating the confusion matrix
@@ -1479,7 +1481,7 @@ model_nr_results_class = precision_recall_fscore_support(model_nr_y_true, model_
 # Consolidating all model evaluation metrics 
 # for CNN with no regularization
 ##################################
-metric_columns = ['Precision','Recall', 'F-Score','Support']
+metric_columns = ['Precision','Recall','F-Score','Support']
 model_nr_all_df = pd.concat([pd.DataFrame(list(model_nr_results_class)).T,pd.DataFrame(list(model_nr_results_all)).T])
 model_nr_all_df.columns = metric_columns
 model_nr_all_df.index = ['COVID', 'Normal', 'Viral Pneumonia','Total']
@@ -1548,6 +1550,34 @@ model_nr_all_df
 
 
 
+
+```python
+##################################
+# Consolidating all model evaluation metrics 
+# for CNN with no regularization
+##################################
+model_nr_model_list = []
+model_nr_measure_list = []
+model_nr_category_list = []
+model_nr_value_list = []
+
+for i in range(3): 
+    for j in range(4):
+        model_nr_model_list.append('CNN_NR')
+        model_nr_measure_list.append(metric_columns[i])
+        model_nr_category_list.append(model_nr_all_df.index[j])
+        model_nr_value_list.append(model_nr_all_df.iloc[j,i])
+
+model_nr_all_summary = pd.DataFrame(zip(model_nr_model_list,
+                                        model_nr_measure_list,
+                                        model_nr_category_list,
+                                        model_nr_value_list), 
+                                        columns=['CNN.Model.Name',
+                                                 'Model.Metric',
+                                                 'Image.Category',
+                                                 'Metric.Value'])
+```
+
 ### 1.6.3 CNN With Dropout Regularization <a class="anchor" id="1.6.3"></a>
 
 1. Details
@@ -1566,13 +1596,11 @@ batch_size = 16
 model_dr = Sequential()
 model_dr.add(Conv2D(32, kernel_size=(3, 3), activation='relu', padding = 'Same', input_shape=(299, 299, 1)))
 model_dr.add(MaxPooling2D(pool_size=(2, 2)))
-model_dr.add(Dropout(0.25))
 model_dr.add(Conv2D(64, kernel_size=(3, 3), padding = 'Same', activation='relu'))
-model_dr.add(MaxPooling2D(pool_size=(2, 2)))
 model_dr.add(Dropout(0.25))
+model_dr.add(MaxPooling2D(pool_size=(2, 2)))
 model_dr.add(Flatten())
 model_dr.add(Dense(128, activation='relu'))
-model_dr.add(Dropout(0.25))
 model_dr.add(Dense(num_classes, activation='softmax'))
 
 ##################################
@@ -1599,20 +1627,16 @@ print(model_dr.summary())
      max_pooling2d (MaxPooling2D  (None, 149, 149, 32)     0         
      )                                                               
                                                                      
-     dropout (Dropout)           (None, 149, 149, 32)      0         
-                                                                     
      conv2d_1 (Conv2D)           (None, 149, 149, 64)      18496     
+                                                                     
+     dropout (Dropout)           (None, 149, 149, 64)      0         
                                                                      
      max_pooling2d_1 (MaxPooling  (None, 74, 74, 64)       0         
      2D)                                                             
                                                                      
-     dropout_1 (Dropout)         (None, 74, 74, 64)        0         
-                                                                     
      flatten (Flatten)           (None, 350464)            0         
                                                                      
      dense (Dense)               (None, 128)               44859520  
-                                                                     
-     dropout_2 (Dropout)         (None, 128)               0         
                                                                      
      dense_1 (Dense)             (None, 3)                 387       
                                                                      
@@ -1634,7 +1658,7 @@ model_dr_layer_names = [layer.name for layer in model_dr.layers]
 print("Layer Names:", model_dr_layer_names)
 ```
 
-    Layer Names: ['conv2d', 'max_pooling2d', 'dropout', 'conv2d_1', 'max_pooling2d_1', 'dropout_1', 'flatten', 'dense', 'dropout_2', 'dense_1']
+    Layer Names: ['conv2d', 'max_pooling2d', 'conv2d_1', 'dropout', 'max_pooling2d_1', 'flatten', 'dense', 'dense_1']
     
 
 
@@ -1651,13 +1675,11 @@ for layer in model_dr.layers:
 
     Layer: conv2d, Number of Weights: 2
     Layer: max_pooling2d, Number of Weights: 0
-    Layer: dropout, Number of Weights: 0
     Layer: conv2d_1, Number of Weights: 2
+    Layer: dropout, Number of Weights: 0
     Layer: max_pooling2d_1, Number of Weights: 0
-    Layer: dropout_1, Number of Weights: 0
     Layer: flatten, Number of Weights: 0
     Layer: dense, Number of Weights: 2
-    Layer: dropout_2, Number of Weights: 0
     Layer: dense_1, Number of Weights: 2
     
 
@@ -1678,13 +1700,11 @@ print("\nTotal Parameters in the Model:", total_parameters)
 
     Layer: conv2d, Parameters: 320
     Layer: max_pooling2d, Parameters: 0
-    Layer: dropout, Parameters: 0
     Layer: conv2d_1, Parameters: 18496
+    Layer: dropout, Parameters: 0
     Layer: max_pooling2d_1, Parameters: 0
-    Layer: dropout_1, Parameters: 0
     Layer: flatten, Parameters: 0
     Layer: dense, Parameters: 44859520
-    Layer: dropout_2, Parameters: 0
     Layer: dense_1, Parameters: 387
     
     Total Parameters in the Model: 44878723
@@ -1716,7 +1736,7 @@ model_dr_history = model_dr.fit(train_gen,
 model_dr_y_pred = model_dr.predict(test_gen)
 ```
 
-    45/45 [==============================] - 3s 73ms/step
+    45/45 [==============================] - 3s 71ms/step
     
 
 
@@ -1731,7 +1751,7 @@ plot_training_history(model_dr_history, 'CNN With Dropout Regularization : ')
 
 
     
-![png](output_79_0.png)
+![png](output_80_0.png)
     
 
 
@@ -1774,7 +1794,7 @@ keras.backend.clear_session()
 
 
     
-![png](output_80_0.png)
+![png](output_81_0.png)
     
 
 
@@ -1844,30 +1864,30 @@ model_dr_all_df
   <tbody>
     <tr>
       <th>COVID</th>
-      <td>0.970297</td>
-      <td>0.816667</td>
-      <td>0.886878</td>
+      <td>0.962791</td>
+      <td>0.862500</td>
+      <td>0.909890</td>
       <td>240.0</td>
     </tr>
     <tr>
       <th>Normal</th>
-      <td>0.684366</td>
-      <td>0.966667</td>
-      <td>0.801382</td>
+      <td>0.847015</td>
+      <td>0.945833</td>
+      <td>0.893701</td>
       <td>240.0</td>
     </tr>
     <tr>
       <th>Viral Pneumonia</th>
-      <td>0.905028</td>
-      <td>0.675000</td>
-      <td>0.773270</td>
+      <td>0.881857</td>
+      <td>0.870833</td>
+      <td>0.876310</td>
       <td>240.0</td>
     </tr>
     <tr>
       <th>Total</th>
-      <td>0.853230</td>
-      <td>0.819444</td>
-      <td>0.820510</td>
+      <td>0.897221</td>
+      <td>0.893056</td>
+      <td>0.893300</td>
       <td>NaN</td>
     </tr>
   </tbody>
@@ -1875,6 +1895,34 @@ model_dr_all_df
 </div>
 
 
+
+
+```python
+##################################
+# Consolidating all model evaluation metrics 
+# for CNN with dropout regularization
+##################################
+model_dr_model_list = []
+model_dr_measure_list = []
+model_dr_category_list = []
+model_dr_value_list = []
+
+for i in range(3): 
+    for j in range(4):
+        model_dr_model_list.append('CNN_DR')
+        model_dr_measure_list.append(metric_columns[i])
+        model_dr_category_list.append(model_dr_all_df.index[j])
+        model_dr_value_list.append(model_dr_all_df.iloc[j,i])
+
+model_dr_all_summary = pd.DataFrame(zip(model_dr_model_list,
+                                        model_dr_measure_list,
+                                        model_dr_category_list,
+                                        model_dr_value_list), 
+                                        columns=['CNN.Model.Name',
+                                                 'Model.Metric',
+                                                 'Image.Category',
+                                                 'Metric.Value'])
+```
 
 ### 1.6.4 CNN With Batch Normalization Regularization <a class="anchor" id="1.6.4"></a>
 
@@ -2039,7 +2087,7 @@ model_bnr_history = model_bnr.fit(train_gen,
 model_bnr_y_pred = model_bnr.predict(test_gen)
 ```
 
-    45/45 [==============================] - 4s 82ms/step
+    45/45 [==============================] - 4s 79ms/step
     
 
 
@@ -2054,7 +2102,7 @@ plot_training_history(model_bnr_history, 'CNN With Batch Normalization Regulariz
 
 
     
-![png](output_90_0.png)
+![png](output_92_0.png)
     
 
 
@@ -2066,7 +2114,7 @@ plot_training_history(model_bnr_history, 'CNN With Batch Normalization Regulariz
 # on the validation set
 ##################################
 model_bnr_predictions = np.array(list(map(lambda x: np.argmax(x), model_bnr_y_pred)))
-model_bnr_y_true=test_gen.classes
+model_bnr_y_true = test_gen.classes
 
 ##################################
 # Formulating the confusion matrix
@@ -2097,7 +2145,7 @@ keras.backend.clear_session()
 
 
     
-![png](output_91_0.png)
+![png](output_93_0.png)
     
 
 
@@ -2199,6 +2247,34 @@ model_bnr_all_df
 
 
 
+
+```python
+##################################
+# Consolidating all model evaluation metrics 
+# for CNN with batch normalization regularization
+##################################
+model_bnr_model_list = []
+model_bnr_measure_list = []
+model_bnr_category_list = []
+model_bnr_value_list = []
+
+for i in range(3): 
+    for j in range(4):
+        model_bnr_model_list.append('CNN_BNR')
+        model_bnr_measure_list.append(metric_columns[i])
+        model_bnr_category_list.append(model_bnr_all_df.index[j])
+        model_bnr_value_list.append(model_bnr_all_df.iloc[j,i])
+
+model_bnr_all_summary = pd.DataFrame(zip(model_bnr_model_list,
+                                        model_bnr_measure_list,
+                                        model_bnr_category_list,
+                                        model_bnr_value_list), 
+                                        columns=['CNN.Model.Name',
+                                                 'Model.Metric',
+                                                 'Image.Category',
+                                                 'Metric.Value'])
+```
+
 ### 1.6.5 CNN With Dropout and Batch Normalization Regularization <a class="anchor" id="1.6.5"></a>
 
 1. Details
@@ -2229,7 +2305,7 @@ model_dr_bnr.add(Dense(num_classes, activation='softmax'))
 ##################################
 # Compiling the network layers
 ##################################
-model_dr_bnr .compile(loss='categorical_crossentropy', optimizer='adam', metrics=[Recall()])
+model_dr_bnr.compile(loss='categorical_crossentropy', optimizer='adam', metrics=[Recall()])
 ```
 
 
@@ -2388,7 +2464,7 @@ plot_training_history(model_dr_bnr_history, 'CNN With Dropout and Batch Normaliz
 
 
     
-![png](output_101_0.png)
+![png](output_104_0.png)
     
 
 
@@ -2401,7 +2477,7 @@ plot_training_history(model_dr_bnr_history, 'CNN With Dropout and Batch Normaliz
 # on the validation set
 ##################################
 model_dr_bnr_predictions = np.array(list(map(lambda x: np.argmax(x), model_dr_bnr_y_pred)))
-model_dr_bnr_y_true=test_gen.classes
+model_dr_bnr_y_true = test_gen.classes
 
 ##################################
 # Formulating the confusion matrix
@@ -2434,7 +2510,7 @@ keras.backend.clear_session()
 
 
     
-![png](output_102_0.png)
+![png](output_105_0.png)
     
 
 
@@ -2540,6 +2616,36 @@ model_dr_bnr_all_df
 
 
 
+
+```python
+##################################
+# Consolidating all model evaluation metrics 
+# for CNN with dropout and
+# batch normalization regularization
+##################################
+model_dr_bnr_model_list = []
+model_dr_bnr_measure_list = []
+model_dr_bnr_category_list = []
+model_dr_bnr_value_list = []
+
+for i in range(3): 
+    for j in range(4):
+        model_dr_bnr_model_list.append('CNN_DR_BNR')
+        model_dr_bnr_measure_list.append(metric_columns[i])
+        model_dr_bnr_category_list.append(model_dr_bnr_all_df.index[j])
+        model_dr_bnr_value_list.append(model_dr_bnr_all_df.iloc[j,i])
+
+model_dr_bnr_all_summary = pd.DataFrame(zip(model_dr_bnr_model_list,
+                                            model_dr_bnr_measure_list,
+                                            model_dr_bnr_category_list,
+                                            model_dr_bnr_value_list), 
+                                        columns=['CNN.Model.Name',
+                                                 'Model.Metric',
+                                                 'Image.Category',
+                                                 'Metric.Value'])
+
+```
+
 ## 1.7. Consolidated Findings <a class="anchor" id="1.7"></a>
 
 1. Details
@@ -2550,9 +2656,357 @@ model_dr_bnr_all_df
 
 ```python
 ##################################
-# Update
+# Consolidating all the
+# CNN model performance measures
 ##################################
+cnn_model_performance_comparison = pd.concat([model_nr_all_summary, 
+                                              model_dr_all_summary,
+                                              model_bnr_all_summary, 
+                                              model_dr_bnr_all_summary], 
+                                             ignore_index=True)
 ```
+
+
+```python
+##################################
+# Consolidating all the precision
+# model performance measures
+##################################
+cnn_model_performance_comparison_precision = cnn_model_performance_comparison[cnn_model_performance_comparison['Model.Metric']=='Precision']
+cnn_model_performance_comparison_precision_CNN_NR = cnn_model_performance_comparison_precision[cnn_model_performance_comparison_precision['CNN.Model.Name']=='CNN_NR'].loc[:,"Metric.Value"]
+cnn_model_performance_comparison_precision_CNN_BR = cnn_model_performance_comparison_precision[cnn_model_performance_comparison_precision['CNN.Model.Name']=='CNN_DR'].loc[:,"Metric.Value"]
+cnn_model_performance_comparison_precision_CNN_BNR = cnn_model_performance_comparison_precision[cnn_model_performance_comparison_precision['CNN.Model.Name']=='CNN_BNR'].loc[:,"Metric.Value"]
+cnn_model_performance_comparison_precision_CNN_DR_BNR = cnn_model_performance_comparison_precision[cnn_model_performance_comparison_precision['CNN.Model.Name']=='CNN_DR_BNR'].loc[:,"Metric.Value"]
+```
+
+
+```python
+##################################
+# Combining all the precision
+# model performance measures
+# for all CNN models
+##################################
+cnn_model_performance_comparison_precision_plot = pd.DataFrame({'CNN_NR': cnn_model_performance_comparison_precision_CNN_NR.values,
+                                                                'CNN_BR': cnn_model_performance_comparison_precision_CNN_BR.values,
+                                                                'CNN_BNR': cnn_model_performance_comparison_precision_CNN_BNR.values,
+                                                                'CNN_DR_BNR': cnn_model_performance_comparison_precision_CNN_DR_BNR.values},
+                                                               index=cnn_model_performance_comparison_precision['Image.Category'].unique())
+cnn_model_performance_comparison_precision_plot
+```
+
+
+
+
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>CNN_NR</th>
+      <th>CNN_BR</th>
+      <th>CNN_BNR</th>
+      <th>CNN_DR_BNR</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>COVID</th>
+      <td>0.954545</td>
+      <td>0.962791</td>
+      <td>0.924686</td>
+      <td>0.908714</td>
+    </tr>
+    <tr>
+      <th>Normal</th>
+      <td>0.909091</td>
+      <td>0.847015</td>
+      <td>0.837302</td>
+      <td>0.875000</td>
+    </tr>
+    <tr>
+      <th>Viral Pneumonia</th>
+      <td>0.825279</td>
+      <td>0.881857</td>
+      <td>0.877729</td>
+      <td>0.842105</td>
+    </tr>
+    <tr>
+      <th>Total</th>
+      <td>0.896305</td>
+      <td>0.897221</td>
+      <td>0.879906</td>
+      <td>0.875273</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+
+
+
+```python
+##################################
+# Plotting all the precision
+# model performance measures
+# for all CNN models
+##################################
+cnn_model_performance_comparison_precision_plot = cnn_model_performance_comparison_precision_plot.plot.barh(figsize=(10, 6), width=0.90)
+cnn_model_performance_comparison_precision_plot.set_xlim(0.00,1.00)
+cnn_model_performance_comparison_precision_plot.set_title("Model Comparison by Precision Performance on Validation Data")
+cnn_model_performance_comparison_precision_plot.set_xlabel("Precision Performance")
+cnn_model_performance_comparison_precision_plot.set_ylabel("Image Categories")
+cnn_model_performance_comparison_precision_plot.grid(False)
+cnn_model_performance_comparison_precision_plot.legend(loc='center left', bbox_to_anchor=(1.0, 0.5))
+for container in cnn_model_performance_comparison_precision_plot.containers:
+    cnn_model_performance_comparison_precision_plot.bar_label(container, fmt='%.5f', padding=-50, color='white', fontweight='bold')
+```
+
+
+    
+![png](output_112_0.png)
+    
+
+
+
+```python
+##################################
+# Consolidating all the recall
+# model performance measures
+##################################
+cnn_model_performance_comparison_recall = cnn_model_performance_comparison[cnn_model_performance_comparison['Model.Metric']=='Recall']
+cnn_model_performance_comparison_recall_CNN_NR = cnn_model_performance_comparison_recall[cnn_model_performance_comparison_recall['CNN.Model.Name']=='CNN_NR'].loc[:,"Metric.Value"]
+cnn_model_performance_comparison_recall_CNN_BR = cnn_model_performance_comparison_recall[cnn_model_performance_comparison_recall['CNN.Model.Name']=='CNN_DR'].loc[:,"Metric.Value"]
+cnn_model_performance_comparison_recall_CNN_BNR = cnn_model_performance_comparison_recall[cnn_model_performance_comparison_recall['CNN.Model.Name']=='CNN_BNR'].loc[:,"Metric.Value"]
+cnn_model_performance_comparison_recall_CNN_DR_BNR = cnn_model_performance_comparison_recall[cnn_model_performance_comparison_recall['CNN.Model.Name']=='CNN_DR_BNR'].loc[:,"Metric.Value"]
+```
+
+
+```python
+##################################
+# Combining all the recall
+# model performance measures
+# for all CNN models
+##################################
+cnn_model_performance_comparison_recall_plot = pd.DataFrame({'CNN_NR': cnn_model_performance_comparison_recall_CNN_NR.values,
+                                                             'CNN_BR': cnn_model_performance_comparison_recall_CNN_BR.values,
+                                                             'CNN_BNR': cnn_model_performance_comparison_recall_CNN_BNR.values,
+                                                             'CNN_DR_BNR': cnn_model_performance_comparison_recall_CNN_DR_BNR.values},
+                                                            index=cnn_model_performance_comparison_recall['Image.Category'].unique())
+cnn_model_performance_comparison_recall_plot
+```
+
+
+
+
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>CNN_NR</th>
+      <th>CNN_BR</th>
+      <th>CNN_BNR</th>
+      <th>CNN_DR_BNR</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>COVID</th>
+      <td>0.875000</td>
+      <td>0.862500</td>
+      <td>0.920833</td>
+      <td>0.912500</td>
+    </tr>
+    <tr>
+      <th>Normal</th>
+      <td>0.875000</td>
+      <td>0.945833</td>
+      <td>0.879167</td>
+      <td>0.845833</td>
+    </tr>
+    <tr>
+      <th>Viral Pneumonia</th>
+      <td>0.925000</td>
+      <td>0.870833</td>
+      <td>0.837500</td>
+      <td>0.866667</td>
+    </tr>
+    <tr>
+      <th>Total</th>
+      <td>0.891667</td>
+      <td>0.893056</td>
+      <td>0.879167</td>
+      <td>0.875000</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+
+
+
+```python
+##################################
+# Plotting all the recall
+# model performance measures
+# for all CNN models
+##################################
+cnn_model_performance_comparison_recall_plot = cnn_model_performance_comparison_recall_plot.plot.barh(figsize=(10, 6), width=0.90)
+cnn_model_performance_comparison_recall_plot.set_xlim(0.00,1.00)
+cnn_model_performance_comparison_recall_plot.set_title("Model Comparison by Recall Performance on Validation Data")
+cnn_model_performance_comparison_recall_plot.set_xlabel("Recall Performance")
+cnn_model_performance_comparison_recall_plot.set_ylabel("Image Categories")
+cnn_model_performance_comparison_recall_plot.grid(False)
+cnn_model_performance_comparison_recall_plot.legend(loc='center left', bbox_to_anchor=(1.0, 0.5))
+for container in cnn_model_performance_comparison_recall_plot.containers:
+    cnn_model_performance_comparison_recall_plot.bar_label(container, fmt='%.5f', padding=-50, color='white', fontweight='bold')
+```
+
+
+    
+![png](output_115_0.png)
+    
+
+
+
+```python
+##################################
+# Consolidating all the f-score
+# model performance measures
+##################################
+cnn_model_performance_comparison_fscore = cnn_model_performance_comparison[cnn_model_performance_comparison['Model.Metric']=='F-Score']
+cnn_model_performance_comparison_fscore_CNN_NR = cnn_model_performance_comparison_fscore[cnn_model_performance_comparison_fscore['CNN.Model.Name']=='CNN_NR'].loc[:,"Metric.Value"]
+cnn_model_performance_comparison_fscore_CNN_BR = cnn_model_performance_comparison_fscore[cnn_model_performance_comparison_fscore['CNN.Model.Name']=='CNN_DR'].loc[:,"Metric.Value"]
+cnn_model_performance_comparison_fscore_CNN_BNR = cnn_model_performance_comparison_fscore[cnn_model_performance_comparison_fscore['CNN.Model.Name']=='CNN_BNR'].loc[:,"Metric.Value"]
+cnn_model_performance_comparison_fscore_CNN_DR_BNR = cnn_model_performance_comparison_fscore[cnn_model_performance_comparison_fscore['CNN.Model.Name']=='CNN_DR_BNR'].loc[:,"Metric.Value"]
+```
+
+
+```python
+##################################
+# Combining all the f-score
+# model performance measures
+# for all CNN models
+##################################
+cnn_model_performance_comparison_fscore_plot = pd.DataFrame({'CNN_NR': cnn_model_performance_comparison_fscore_CNN_NR.values,
+                                                             'CNN_BR': cnn_model_performance_comparison_fscore_CNN_BR.values,
+                                                             'CNN_BNR': cnn_model_performance_comparison_fscore_CNN_BNR.values,
+                                                             'CNN_DR_BNR': cnn_model_performance_comparison_fscore_CNN_DR_BNR.values},
+                                                            index=cnn_model_performance_comparison_fscore['Image.Category'].unique())
+cnn_model_performance_comparison_fscore_plot
+```
+
+
+
+
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>CNN_NR</th>
+      <th>CNN_BR</th>
+      <th>CNN_BNR</th>
+      <th>CNN_DR_BNR</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>COVID</th>
+      <td>0.913043</td>
+      <td>0.909890</td>
+      <td>0.922756</td>
+      <td>0.910603</td>
+    </tr>
+    <tr>
+      <th>Normal</th>
+      <td>0.891720</td>
+      <td>0.893701</td>
+      <td>0.857724</td>
+      <td>0.860169</td>
+    </tr>
+    <tr>
+      <th>Viral Pneumonia</th>
+      <td>0.872299</td>
+      <td>0.876310</td>
+      <td>0.857143</td>
+      <td>0.854209</td>
+    </tr>
+    <tr>
+      <th>Total</th>
+      <td>0.892354</td>
+      <td>0.893300</td>
+      <td>0.879207</td>
+      <td>0.874994</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+
+
+
+```python
+##################################
+# Plotting all the fscore
+# model performance measures
+# for all CNN models
+##################################
+cnn_model_performance_comparison_fscore_plot = cnn_model_performance_comparison_fscore_plot.plot.barh(figsize=(10, 6), width=0.90)
+cnn_model_performance_comparison_fscore_plot.set_xlim(0.00,1.00)
+cnn_model_performance_comparison_fscore_plot.set_title("Model Comparison by F-Score Performance on Validation Data")
+cnn_model_performance_comparison_fscore_plot.set_xlabel("F-Score Performance")
+cnn_model_performance_comparison_fscore_plot.set_ylabel("Image Categories")
+cnn_model_performance_comparison_fscore_plot.grid(False)
+cnn_model_performance_comparison_fscore_plot.legend(loc='center left', bbox_to_anchor=(1.0, 0.5))
+for container in cnn_model_performance_comparison_fscore_plot.containers:
+    cnn_model_performance_comparison_fscore_plot.bar_label(container, fmt='%.5f', padding=-50, color='white', fontweight='bold')
+```
+
+
+    
+![png](output_118_0.png)
+    
+
 
 # 2. Summary <a class="anchor" id="Summary"></a>
 
@@ -2646,18 +3100,28 @@ A detailed [report](https://github.com/JohnPaulinePineda/Unsupervised-Machine-Le
 * **[Book]** [Fundamentals of Deep Learning](https://www.oreilly.com/library/view/fundamentals-of-deep/9781492082170/) by Nithin Buduma, Nikhil Buduma and Joe Papa
 * **[Book]** [Hands-On Machine Learning with Scikit-Learn, Keras and Tensorflow](https://www.oreilly.com/library/view/hands-on-machine-learning/9781492032632/) by Aurelien Geron
 * **[Book]** [Deep Learning for Computer Vision](https://machinelearningmastery.com/deep-learning-for-computer-vision/) by Jason Brownlee
-* **[Python Library API]** [NumPy](https://numpy.org/doc/) by NumPy Team
+* **[Python Library API]** [numpy](https://numpy.org/doc/) by NumPy Team
 * **[Python Library API]** [pandas](https://pandas.pydata.org/docs/) by Pandas Team
 * **[Python Library API]** [seaborn](https://seaborn.pydata.org/) by Seaborn Team
 * **[Python Library API]** [matplotlib.pyplot](https://matplotlib.org/3.5.3/api/_as_gen/matplotlib.pyplot.html) by MatPlotLib Team
-* **[Python Library API]** [itertools](https://docs.python.org/3/library/itertools.html) by Python Team
-* **[Python Library API]** [operator](https://docs.python.org/3/library/operator.html) by Python Team
-* **[Python Library API]** [sklearn.preprocessing](https://scikit-learn.org/stable/modules/classes.html#module-sklearn.preprocessing) by Scikit-Learn Team
+* **[Python Library API]** [matplotlib.image](https://matplotlib.org/stable/api/image_api.html) by MatPlotLib Team
+* **[Python Library API]** [matplotlib.offsetbox](https://matplotlib.org/stable/api/offsetbox_api.html) by MatPlotLib Team
+* **[Python Library API]** [tensorflow](https://pypi.org/project/tensorflow/) by TensorFlow Team
+* **[Python Library API]** [keras](https://pypi.org/project/keras/) by Keras Team
+* **[Python Library API]** [pil](https://pypi.org/project/Pillow/) by Pillow Team
+* **[Python Library API]** [glob](https://docs.python.org/3/library/glob.html) by glob Team
+* **[Python Library API]** [cv2](https://pypi.org/project/opencv-python/) by OpenCV Team
+* **[Python Library API]** [os](https://docs.python.org/3/library/os.html) by os Team
+* **[Python Library API]** [random](https://docs.python.org/3/library/random.html) by random Team
+* **[Python Library API]** [keras.models](https://www.tensorflow.org/api_docs/python/tf/keras/models) by TensorFlow Team
+* **[Python Library API]** [keras.layers](https://www.tensorflow.org/api_docs/python/tf/keras/layers) by TensorFlow Team
+* **[Python Library API]** [keras.wrappers](https://www.tensorflow.org/api_docs/python/tf/keras/layers/Wrapper) by TensorFlow Team
+* **[Python Library API]** [keras.utils](https://www.tensorflow.org/api_docs/python/tf/keras/utils) by TensorFlow Team
+* **[Python Library API]** [keras.optimizers](https://www.tensorflow.org/api_docs/python/tf/keras/optimizers) by TensorFlow Team
+* **[Python Library API]** [keras.preprocessing.image](https://www.tensorflow.org/api_docs/python/tf/keras/preprocessing/image) by TensorFlow Team
+* **[Python Library API]** [keras.callbacks](https://www.tensorflow.org/api_docs/python/tf/keras/callbacks) by TensorFlow Team
+* **[Python Library API]** [keras.metrics](https://www.tensorflow.org/api_docs/python/tf/keras/metrics) by TensorFlow Team
 * **[Python Library API]** [sklearn.metrics](https://scikit-learn.org/stable/modules/model_evaluation.html) by Scikit-Learn Team
-* **[Python Library API]** [sklearn.cluster](https://scikit-learn.org/stable/modules/clustering.html) by Scikit-Learn Team
-* **[Python Library API]** [sklearn.mixture](https://scikit-learn.org/stable/modules/mixture.html) by Scikit-Learn Team
-* **[Python Library API]** [SciPy](https://docs.scipy.org/doc/scipy/) by SciPy Team
-* **[Python Library API]** [GeoPandas](https://geopandas.org/en/stable/docs.html) by GeroPandas Team
 * **[Article]** [Convolutional Neural Networks, Explained](https://towardsdatascience.com/convolutional-neural-networks-explained-9cc5188c4939) by Mayank Mishra (Towards Data Science)
 * **[Article]** [A Comprehensive Guide to Convolutional Neural Networks — the ELI5 way](https://towardsdatascience.com/a-comprehensive-guide-to-convolutional-neural-networks-the-eli5-way-3bd2b1164a53) by Sumit Saha (Towards Data Science)
 * **[Article]** [Understanding Convolutional Neural Networks: A Beginner’s Journey into the Architecture](https://medium.com/codex/understanding-convolutional-neural-networks-a-beginners-journey-into-the-architecture-aab30dface10) by Afaque Umer (Medium)
