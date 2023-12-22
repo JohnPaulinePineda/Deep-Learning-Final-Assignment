@@ -505,10 +505,8 @@ xray_images.Diagnosis.value_counts(normalize=True)
 ## 1.3. Data Quality Assessment <a class="anchor" id="1.3"></a>
 
 Data quality findings based on assessment are as follows:
-1. Details
-    * 1.1 Details
-        * 1.1.1 Details
-            * 1.1.1.1 Details
+1. No duplicated images observed.
+2. No null images observed.
 
 
 ```python
@@ -550,10 +548,14 @@ xray_images.isnull().sum()
 
 ### 1.4.1 Image Description <a class="anchor" id="1.4.1"></a>
 
-1. Details
-    * 1.1 Details
-        * 1.1.1 Details
-            * 1.1.1.1 Details
+1. Each image contains 3 channels:
+    * 1.1 Red channel pixel value range = 0 to 255
+    * 1.2 Blue channel pixel value range = 0 to 255
+    * 1.3 Green channel pixel value range = 0 to 255
+2. Each images is in gray scale indicating that the values for each individual channel are exactly the same.
+    * 2.1 Image height = 299 pixels
+    * 2.2 Image width = 299 pixels
+    * 2.3 Image size = 268203 pixels
 
 
 ```python
@@ -896,10 +898,15 @@ display(image.min())
 
 ### 1.4.2 Image Augmentation <a class="anchor" id="1.4.2"></a>
 
-1. Details
-    * 1.1 Details
-        * 1.1.1 Details
-            * 1.1.1.1 Details
+1. Different image augmentation techniques were applied using various transformations to the training images to artificially increase the diversity of the dataset and improve the generalization and robustness of the model, including:
+    * 1.1 Rescaling - normalization of the pixel values within the 0 to 1 range
+    * 1.2 Rotation - random image rotation by 20 degrees
+    * 1.3 Width Shift - random horizontal shifting of the image by 20% of the total width
+    * 1.4 Height Shift - random vertical shifting of the image by 20% of the total height
+    * 1.5 Horizontal Flip - random horizontal flipping of the image
+    * 1.6 Vertical Flip - random vertical flipping of the image
+    * 1.7 Shear Transformation - image slanting by 20 degrees along the horizontal axis.
+    * 1.8 Zooming - random image zoom-in or zoom-out by a factor of 20%
 
 
 ```python
@@ -928,6 +935,9 @@ train_datagen = ImageDataGenerator(rescale=1./255,
                                    width_shift_range=0.2,
                                    height_shift_range=0.2,
                                    horizontal_flip=True,
+                                   vertical_flip=True,
+                                   shear_range=0.2,
+                                   zoom_range=0.2,
                                    validation_split=0.2)
 
 
@@ -1391,7 +1401,7 @@ model_nr_history = model_nr.fit(train_gen,
 model_nr_y_pred = model_nr.predict(test_gen)
 ```
 
-    45/45 [==============================] - 4s 81ms/step
+    45/45 [==============================] - 3s 73ms/step
     
 
 
@@ -1518,30 +1528,30 @@ model_nr_all_df
   <tbody>
     <tr>
       <th>COVID</th>
-      <td>0.954545</td>
-      <td>0.875000</td>
-      <td>0.913043</td>
+      <td>0.890295</td>
+      <td>0.879167</td>
+      <td>0.884696</td>
       <td>240.0</td>
     </tr>
     <tr>
       <th>Normal</th>
-      <td>0.909091</td>
-      <td>0.875000</td>
-      <td>0.891720</td>
+      <td>0.671378</td>
+      <td>0.791667</td>
+      <td>0.726577</td>
       <td>240.0</td>
     </tr>
     <tr>
       <th>Viral Pneumonia</th>
-      <td>0.825279</td>
-      <td>0.925000</td>
-      <td>0.872299</td>
+      <td>0.810000</td>
+      <td>0.675000</td>
+      <td>0.736364</td>
       <td>240.0</td>
     </tr>
     <tr>
       <th>Total</th>
-      <td>0.896305</td>
-      <td>0.891667</td>
-      <td>0.892354</td>
+      <td>0.790558</td>
+      <td>0.781944</td>
+      <td>0.782546</td>
       <td>NaN</td>
     </tr>
   </tbody>
@@ -1736,7 +1746,7 @@ model_dr_history = model_dr.fit(train_gen,
 model_dr_y_pred = model_dr.predict(test_gen)
 ```
 
-    45/45 [==============================] - 3s 71ms/step
+    45/45 [==============================] - 4s 77ms/step
     
 
 
@@ -1864,30 +1874,30 @@ model_dr_all_df
   <tbody>
     <tr>
       <th>COVID</th>
-      <td>0.962791</td>
-      <td>0.862500</td>
-      <td>0.909890</td>
+      <td>0.906504</td>
+      <td>0.929167</td>
+      <td>0.917695</td>
       <td>240.0</td>
     </tr>
     <tr>
       <th>Normal</th>
-      <td>0.847015</td>
-      <td>0.945833</td>
-      <td>0.893701</td>
+      <td>0.904255</td>
+      <td>0.708333</td>
+      <td>0.794393</td>
       <td>240.0</td>
     </tr>
     <tr>
       <th>Viral Pneumonia</th>
-      <td>0.881857</td>
-      <td>0.870833</td>
-      <td>0.876310</td>
+      <td>0.758741</td>
+      <td>0.904167</td>
+      <td>0.825095</td>
       <td>240.0</td>
     </tr>
     <tr>
       <th>Total</th>
-      <td>0.897221</td>
-      <td>0.893056</td>
-      <td>0.893300</td>
+      <td>0.856500</td>
+      <td>0.847222</td>
+      <td>0.845728</td>
       <td>NaN</td>
     </tr>
   </tbody>
@@ -2087,7 +2097,7 @@ model_bnr_history = model_bnr.fit(train_gen,
 model_bnr_y_pred = model_bnr.predict(test_gen)
 ```
 
-    45/45 [==============================] - 4s 79ms/step
+    45/45 [==============================] - 4s 84ms/step
     
 
 
@@ -2215,30 +2225,30 @@ model_bnr_all_df
   <tbody>
     <tr>
       <th>COVID</th>
-      <td>0.924686</td>
-      <td>0.920833</td>
-      <td>0.922756</td>
+      <td>0.943231</td>
+      <td>0.900000</td>
+      <td>0.921109</td>
       <td>240.0</td>
     </tr>
     <tr>
       <th>Normal</th>
-      <td>0.837302</td>
-      <td>0.879167</td>
-      <td>0.857724</td>
+      <td>0.876448</td>
+      <td>0.945833</td>
+      <td>0.909820</td>
       <td>240.0</td>
     </tr>
     <tr>
       <th>Viral Pneumonia</th>
-      <td>0.877729</td>
-      <td>0.837500</td>
-      <td>0.857143</td>
+      <td>0.913793</td>
+      <td>0.883333</td>
+      <td>0.898305</td>
       <td>240.0</td>
     </tr>
     <tr>
       <th>Total</th>
-      <td>0.879906</td>
-      <td>0.879167</td>
-      <td>0.879207</td>
+      <td>0.911157</td>
+      <td>0.909722</td>
+      <td>0.909744</td>
       <td>NaN</td>
     </tr>
   </tbody>
@@ -2448,7 +2458,7 @@ model_dr_bnr_history = model_dr_bnr.fit(train_gen,
 model_dr_bnr_y_pred = model_dr_bnr.predict(test_gen)
 ```
 
-    45/45 [==============================] - 4s 78ms/step
+    45/45 [==============================] - 4s 91ms/step
     
 
 
@@ -2584,30 +2594,30 @@ model_dr_bnr_all_df
   <tbody>
     <tr>
       <th>COVID</th>
-      <td>0.908714</td>
-      <td>0.912500</td>
-      <td>0.910603</td>
+      <td>0.950450</td>
+      <td>0.879167</td>
+      <td>0.913420</td>
       <td>240.0</td>
     </tr>
     <tr>
       <th>Normal</th>
-      <td>0.875000</td>
-      <td>0.845833</td>
-      <td>0.860169</td>
+      <td>0.779310</td>
+      <td>0.941667</td>
+      <td>0.852830</td>
       <td>240.0</td>
     </tr>
     <tr>
       <th>Viral Pneumonia</th>
-      <td>0.842105</td>
-      <td>0.866667</td>
-      <td>0.854209</td>
+      <td>0.923077</td>
+      <td>0.800000</td>
+      <td>0.857143</td>
       <td>240.0</td>
     </tr>
     <tr>
       <th>Total</th>
-      <td>0.875273</td>
-      <td>0.875000</td>
-      <td>0.874994</td>
+      <td>0.884279</td>
+      <td>0.873611</td>
+      <td>0.874464</td>
       <td>NaN</td>
     </tr>
   </tbody>
@@ -2724,31 +2734,31 @@ cnn_model_performance_comparison_precision_plot
   <tbody>
     <tr>
       <th>COVID</th>
-      <td>0.954545</td>
-      <td>0.962791</td>
-      <td>0.924686</td>
-      <td>0.908714</td>
+      <td>0.890295</td>
+      <td>0.906504</td>
+      <td>0.943231</td>
+      <td>0.950450</td>
     </tr>
     <tr>
       <th>Normal</th>
-      <td>0.909091</td>
-      <td>0.847015</td>
-      <td>0.837302</td>
-      <td>0.875000</td>
+      <td>0.671378</td>
+      <td>0.904255</td>
+      <td>0.876448</td>
+      <td>0.779310</td>
     </tr>
     <tr>
       <th>Viral Pneumonia</th>
-      <td>0.825279</td>
-      <td>0.881857</td>
-      <td>0.877729</td>
-      <td>0.842105</td>
+      <td>0.810000</td>
+      <td>0.758741</td>
+      <td>0.913793</td>
+      <td>0.923077</td>
     </tr>
     <tr>
       <th>Total</th>
-      <td>0.896305</td>
-      <td>0.897221</td>
-      <td>0.879906</td>
-      <td>0.875273</td>
+      <td>0.790558</td>
+      <td>0.856500</td>
+      <td>0.911157</td>
+      <td>0.884279</td>
     </tr>
   </tbody>
 </table>
@@ -2838,31 +2848,31 @@ cnn_model_performance_comparison_recall_plot
   <tbody>
     <tr>
       <th>COVID</th>
-      <td>0.875000</td>
-      <td>0.862500</td>
-      <td>0.920833</td>
-      <td>0.912500</td>
+      <td>0.879167</td>
+      <td>0.929167</td>
+      <td>0.900000</td>
+      <td>0.879167</td>
     </tr>
     <tr>
       <th>Normal</th>
-      <td>0.875000</td>
+      <td>0.791667</td>
+      <td>0.708333</td>
       <td>0.945833</td>
-      <td>0.879167</td>
-      <td>0.845833</td>
+      <td>0.941667</td>
     </tr>
     <tr>
       <th>Viral Pneumonia</th>
-      <td>0.925000</td>
-      <td>0.870833</td>
-      <td>0.837500</td>
-      <td>0.866667</td>
+      <td>0.675000</td>
+      <td>0.904167</td>
+      <td>0.883333</td>
+      <td>0.800000</td>
     </tr>
     <tr>
       <th>Total</th>
-      <td>0.891667</td>
-      <td>0.893056</td>
-      <td>0.879167</td>
-      <td>0.875000</td>
+      <td>0.781944</td>
+      <td>0.847222</td>
+      <td>0.909722</td>
+      <td>0.873611</td>
     </tr>
   </tbody>
 </table>
@@ -2952,31 +2962,31 @@ cnn_model_performance_comparison_fscore_plot
   <tbody>
     <tr>
       <th>COVID</th>
-      <td>0.913043</td>
-      <td>0.909890</td>
-      <td>0.922756</td>
-      <td>0.910603</td>
+      <td>0.884696</td>
+      <td>0.917695</td>
+      <td>0.921109</td>
+      <td>0.913420</td>
     </tr>
     <tr>
       <th>Normal</th>
-      <td>0.891720</td>
-      <td>0.893701</td>
-      <td>0.857724</td>
-      <td>0.860169</td>
+      <td>0.726577</td>
+      <td>0.794393</td>
+      <td>0.909820</td>
+      <td>0.852830</td>
     </tr>
     <tr>
       <th>Viral Pneumonia</th>
-      <td>0.872299</td>
-      <td>0.876310</td>
+      <td>0.736364</td>
+      <td>0.825095</td>
+      <td>0.898305</td>
       <td>0.857143</td>
-      <td>0.854209</td>
     </tr>
     <tr>
       <th>Total</th>
-      <td>0.892354</td>
-      <td>0.893300</td>
-      <td>0.879207</td>
-      <td>0.874994</td>
+      <td>0.782546</td>
+      <td>0.845728</td>
+      <td>0.909744</td>
+      <td>0.874464</td>
     </tr>
   </tbody>
 </table>
