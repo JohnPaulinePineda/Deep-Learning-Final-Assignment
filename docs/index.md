@@ -899,14 +899,14 @@ display(image.min())
 ### 1.4.2 Image Augmentation <a class="anchor" id="1.4.2"></a>
 
 1. Different image augmentation techniques were applied using various transformations to the training images to artificially increase the diversity of the dataset and improve the generalization and robustness of the model, including:
-    * 1.1 Rescaling - normalization of the pixel values within the 0 to 1 range
-    * 1.2 Rotation - random image rotation by 20 degrees
-    * 1.3 Width Shift - random horizontal shifting of the image by 20% of the total width
-    * 1.4 Height Shift - random vertical shifting of the image by 20% of the total height
-    * 1.5 Horizontal Flip - random horizontal flipping of the image
-    * 1.6 Vertical Flip - random vertical flipping of the image
-    * 1.7 Shear Transformation - image slanting by 20 degrees along the horizontal axis.
-    * 1.8 Zooming - random image zoom-in or zoom-out by a factor of 20%
+    * 1.1 **Rescaling** - normalization of the pixel values within the 0 to 1 range
+    * 1.2 **Rotation** - random image rotation by 20 degrees
+    * 1.3 **Width Shift** - random horizontal shifting of the image by 20% of the total width
+    * 1.4 **Height Shift** - random vertical shifting of the image by 20% of the total height
+    * 1.5 **Horizontal Flip** - random horizontal flipping of the image
+    * 1.6 **Vertical Flip** - random vertical flipping of the image
+    * 1.7 **Shear Transformation** - image slanting by 20 degrees along the horizontal axis.
+    * 1.8 **Zooming** - random image zoom-in or zoom-out by a factor of 20%
 
 
 ```python
@@ -997,12 +997,13 @@ test_datagen = ImageDataGenerator(rescale=1./255,
 # Loading the model evaluation images
 ##################################
 test_gen = test_datagen.flow_from_directory(directory=path, 
-                                              target_size=(299, 299),
-                                              class_mode='categorical',
-                                              subset='validation',
-                                              shuffle=False, classes=classes,
-                                              batch_size=batch_size, 
-                                              color_mode="grayscale")
+                                            target_size=(299, 299),
+                                            class_mode='categorical',
+                                            subset='validation',
+                                            shuffle=False, 
+                                            classes=classes,
+                                            batch_size=batch_size, 
+                                            color_mode="grayscale")
 ```
 
     Found 720 images belonging to 3 classes.
@@ -1035,10 +1036,19 @@ plt.show()
 
 ### 1.5.1 Exploratory Data Analysis <a class="anchor" id="1.5.1"></a>
 
-1. Details
-    * 1.1 Details
-        * 1.1.1 Details
-            * 1.1.1.1 Details
+1. Distinct patterns were observed between the image categories.
+    * 1.1 Images identified with <span style="color: #FF0000">CLASS: COVID</span> had the following characteristics:
+        * 1.1.1 Higher mean pixel values indicating generally with more lighter images
+        * 1.1.2 Bimodal and wider distribution of maximum pixel values indicating a higher variation in highest possible values
+        * 1.1.3 Wider range of image pixel standard deviation indicating a higher variation in contrast
+    * 1.2 Images identified with <span style="color: #FF0000">CLASS: Viral Pneumonia</span> had the following characteristics:
+        * 1.2.1 Higher mean pixel values indicating generally with more lighter images
+        * 1.2.2 Bimodal and wider distribution of maximum pixel values indicating a higher variation in highest possible values
+        * 1.2.3 Wider range of image pixel standard deviation indicating a higher variation in contrast
+    * 1.3 Images identified with <span style="color: #FF0000">CLASS: Normal</span> had the following characteristics:
+        * 1.3.1 Lower mean pixel values indicating generally with less lighter images
+        * 1.3.2 Unimodal and steeper distribution of maximum pixel values indicating more stable highest possible values
+        * 1.3.3 Compact range of image pixel standard deviation indicating images with sufficient contrast
 
 
 ```python
@@ -1190,12 +1200,14 @@ def getImage(path):
 DF_sample = imageEDA.sample(frac=1.0, replace=False, random_state=1)
 paths = DF_sample['Path']
 
-fig, ax = plt.subplots(figsize=(20,8))
+fig, ax = plt.subplots(figsize=(15,9))
 ab = sns.scatterplot(data=DF_sample, x="Mean", y='StDev')
 sns.despine(top=True, right=True, left=False, bottom=False)
 ax.set_xlabel('Image Pixel Mean', fontsize=14, weight='bold')
 ax.set_ylabel('Image Pixel Standard Deviation', fontsize=14, weight='bold')
-plt.title('Image Pixel Mean and Standard Deviation Distribution', fontsize=14, weight='bold');
+ax.set_xlim(40,220)
+ax.set_ylim(10,110)
+plt.title('Overall: Image Pixel Mean and Standard Deviation Distribution', fontsize=14, weight='bold');
 
 for x0, y0, path in zip(DF_sample['Mean'], DF_sample['StDev'],paths):
     ab = AnnotationBbox(getImage(path), (x0, y0), frameon=False)
@@ -1208,21 +1220,204 @@ for x0, y0, path in zip(DF_sample['Mean'], DF_sample['StDev'],paths):
     
 
 
+
+```python
+##################################
+# Formulating the mean and standard deviation 
+# scatterplot distribution
+# of the image pixel values
+# represented as actual images
+# for the Covid-19 class
+##################################
+path_covid = 'C:/Users/John pauline magno/Python Notebooks/COVID-19_Radiography_Dataset/COVID/'
+imageEDA_covid = imageEDA.loc[imageEDA['Class'] == 'Covid-19']
+
+def getImage(path_covid):
+    return OffsetImage(cv2.imread(path_covid),zoom = 0.1)
+
+DF_sample = imageEDA_covid.sample(frac=1.0, replace=False, random_state=1)
+paths = DF_sample['Path']
+
+fig, ax = plt.subplots(figsize=(15,9))
+ab = sns.scatterplot(data=DF_sample, x="Mean", y='StDev')
+sns.despine(top=True, right=True, left=False, bottom=False)
+ax.set_xlabel('Image Pixel Mean', fontsize=14, weight='bold')
+ax.set_ylabel('Image Pixel Standard Deviation', fontsize=14, weight='bold')
+ax.set_xlim(40,220)
+ax.set_ylim(10,110)
+plt.title('Covid-19: Image Pixel Mean and Standard Deviation Distribution', fontsize=14, weight='bold');
+
+for x0, y0, path_covid in zip(DF_sample['Mean'], DF_sample['StDev'],paths):
+    ab = AnnotationBbox(getImage(path_covid), (x0, y0), frameon=False)
+    ax.add_artist(ab)
+```
+
+
+    
+![png](output_57_0.png)
+    
+
+
+
+```python
+##################################
+# Formulating the mean and standard deviation 
+# scatterplot distribution
+# of the image pixel values
+# represented as actual images
+# for the Viral Pneumonia class
+##################################
+path_viral_pneumonia = 'C:/Users/John pauline magno/Python Notebooks/COVID-19_Radiography_Dataset/Viral Pneumonia/'
+imageEDA_viral_pneumonia = imageEDA.loc[imageEDA['Class'] == 'Viral Pneumonia']
+
+def getImage(path_viral_pneumonia):
+    return OffsetImage(cv2.imread(path_viral_pneumonia),zoom = 0.1)
+
+DF_sample = imageEDA_viral_pneumonia.sample(frac=1.0, replace=False, random_state=1)
+paths = DF_sample['Path']
+
+fig, ax = plt.subplots(figsize=(15,9))
+ab = sns.scatterplot(data=DF_sample, x="Mean", y='StDev')
+sns.despine(top=True, right=True, left=False, bottom=False)
+ax.set_xlabel('Image Pixel Mean', fontsize=14, weight='bold')
+ax.set_ylabel('Image Pixel Standard Deviation', fontsize=14, weight='bold')
+ax.set_xlim(40,220)
+ax.set_ylim(10,110)
+plt.title('Viral Pneumonia: Image Pixel Mean and Standard Deviation Distribution', fontsize=14, weight='bold');
+
+for x0, y0, path_viral_pneumonia in zip(DF_sample['Mean'], DF_sample['StDev'],paths):
+    ab = AnnotationBbox(getImage(path_viral_pneumonia), (x0, y0), frameon=False)
+    ax.add_artist(ab)
+```
+
+
+    
+![png](output_58_0.png)
+    
+
+
+
+```python
+##################################
+# Formulating the mean and standard deviation 
+# scatterplot distribution
+# of the image pixel values
+# represented as actual images
+# for the Viral Pneumonia class
+##################################
+path_normal = 'C:/Users/John pauline magno/Python Notebooks/COVID-19_Radiography_Dataset/Normal/'
+imageEDA_normal = imageEDA.loc[imageEDA['Class'] == 'Healthy']
+
+def getImage(path_normal):
+    return OffsetImage(cv2.imread(path_normal),zoom = 0.1)
+
+DF_sample = imageEDA_normal.sample(frac=1.0, replace=False, random_state=1)
+paths = DF_sample['Path']
+
+fig, ax = plt.subplots(figsize=(15,9))
+ab = sns.scatterplot(data=DF_sample, x="Mean", y='StDev')
+sns.despine(top=True, right=True, left=False, bottom=False)
+ax.set_xlabel('Image Pixel Mean', fontsize=14, weight='bold')
+ax.set_ylabel('Image Pixel Standard Deviation', fontsize=14, weight='bold')
+ax.set_xlim(40,220)
+ax.set_ylim(10,110)
+plt.title('Healthy: Image Pixel Mean and Standard Deviation Distribution', fontsize=14, weight='bold');
+
+for x0, y0, path_normal in zip(DF_sample['Mean'], DF_sample['StDev'],paths):
+    ab = AnnotationBbox(getImage(path_normal), (x0, y0), frameon=False)
+    ax.add_artist(ab)
+```
+
+
+    
+![png](output_59_0.png)
+    
+
+
 ## 1.6. Model Development <a class="anchor" id="1.6"></a>
 
 ### 1.6.1 Premodelling Data Description <a class="anchor" id="1.6.1"></a>
 
-1. Details
-    * 1.1 Details
-        * 1.1.1 Details
-            * 1.1.1.1 Details
+1. Training data included **2880 augmented images** representing 80% of the dataset.
+2. Validation data included **720 non-augmented images** representing 20% of the dataset.
+3. Candidate models were formulated using common layers as follows:
+    * 3.1 **Convolutional Layer** - extracts features from input images using convolutional filters
+    * 3.2 **Maximum Pooling Layer** - Reduces spatial dimensions and downsamples feature maps
+    * 3.3 **Activation Layer** - Applies an activation function element-wise to the output
+    * 3.4 **Flatten Layer** - Flattens the input to a 1D array, preparing for fully connected layers
+    * 3.5 **Dense Layer** - Fully connected layer for classification
+4. Different iterations of the model were formulated using variations in the inclusion or exclusion of the following regularization layers:
+    * 4.1 **Dropout Layer** - randomly drops (sets to zero) a fraction of the neurons during training reducing co-dependencies between them
+    * 4.2 **Batch Normalization Layer** - adjusts and scales the inputs to a layer reducing the sensitivity to weight initialization choices
+5. A subset of hyperparameters for the different layers were fixed during model training including:
+    * 5.1 **Filters** - setting used to capture spatial hierarchies and features in the input images
+    * 5.2 **Kernel Size** - setting used to define the local region the convolutional layer considers when processing the input
+    * 5.3 **Activation** - setting used to introduce non-linearity into the model, enabling it to learn complex relationships in the data
+    * 5.4 **Pool Size** - setting used to reduce the spatial dimensions of the feature maps to focus on the most important features
+    * 5.5 **Padding** - setting used to control the spatial size and shape for every convolutional operation at each stage
+    * 5.6 **Dense Units** - setting used to process the flattened feature maps and determine the dimensionality of the output space
+    * 5.7 **Optimizer** - setting used to determine how the model's weights are updated during training
+    * 5.8 **Learning Rate** - setting used to determine the step size at each iteration during optimization
+    * 5.9 **Batch Size** - setting used to determine how many samples are used in each iteration of training
+    * 5.10 **Loss** - setting used to define the objective that the model seeks to minimize during training
 
 ### 1.6.2 CNN With No Regularization <a class="anchor" id="1.6.2"></a>
+          
+1. The [convolutional neural network model](https://www.tensorflow.org/api_docs/python/tf/keras/models) from the <mark style="background-color: #CCECFF"><b>keras.models</b></mark> Python library API was implemented. 
+2. The model contains 7 layers with fixed hyperparameters as follows:
+    * <span style="color: #FF0000">Conv2D: conv2d</span>
+        * <span style="color: #FF0000">filters</span> = 32
+        * <span style="color: #FF0000">kernel_size</span> = 3x3
+        * <span style="color: #FF0000">activation</span> = relu (rectified linear unit)
+        * <span style="color: #FF0000">padding</span> = same (output size equals input size)
+        * <span style="color: #FF0000">input_shape</span> = 299x299x1
+    * <span style="color: #FF0000">MaxPooling2D: max_pooling2d</span>
+        * <span style="color: #FF0000">pool_size</span> = 2x2
+    * <span style="color: #FF0000">Conv2D: conv2d_1</span>
+        * <span style="color: #FF0000">filters</span> = 64
+        * <span style="color: #FF0000">kernel_size</span> = 3x3
+        * <span style="color: #FF0000">activation</span> = relu (rectified linear unit)
+        * <span style="color: #FF0000">padding</span> = same (output size equals input size)
+    * <span style="color: #FF0000">MaxPooling2D: max_pooling2d_1</span>
+        * <span style="color: #FF0000">pool_size</span> = 2x2
+    * <span style="color: #FF0000">Flatten: flatten</span>
+    * <span style="color: #FF0000">Dense: dense</span>
+        * <span style="color: #FF0000">units</span> = 128
+        * <span style="color: #FF0000">activation</span> = relu (rectified linear unit)
+    * <span style="color: #FF0000">Dense: dense_1</span>
+        * <span style="color: #FF0000">units</span> = 3
+        * <span style="color: #FF0000">activation</span> = softmax
+3. Additional fixed hyperparameters used during model compilation are as follows:
+    * <span style="color: #FF0000">loss</span> = categorical_crossentropy
+    * <span style="color: #FF0000">optimizer</span> = adam (adaptive moment estimation)
+    * <span style="color: #FF0000">metrics</span> = recall
+4. The model contained 44,878,723 trainable parameters broken down per layer as follows:
+    * <span style="color: #FF0000">Conv2D: conv2d</span>
+        * output size = 299x299x32
+        * number of parameters = 320
+    * <span style="color: #FF0000">MaxPooling2D: max_pooling2d</span>
+        * output size = 149x149x32
+        * number of parameters = 0
+    * <span style="color: #FF0000">Conv2D: conv2d_1</span>
+        * output size = 149x149x64
+        * number of parameters = 18496 
+    * <span style="color: #FF0000">MaxPooling2D: max_pooling2d_1</span>
+        * output size = 74x74x64
+        * number of parameters = 0
+    * <span style="color: #FF0000">Flatten: flatten</span>
+        * output size = 350464
+        * number of parameters = 0
+    * <span style="color: #FF0000">Dense: dense</span>
+        * output size = 128
+        * number of parameters = 44859520
+    * <span style="color: #FF0000">Dense: dense_1</span>
+        * output size = 3
+        * number of parameters = 387
+5. The model performance on the validation set for all image categories is summarized as follows:
+    * **Precision** = 0.7906
+    * **Recall** = 0.7819
+    * **F1 Score** = 0.7825
 
-1. Details
-    * 1.1 Details
-        * 1.1.1 Details
-            * 1.1.1.1 Details
 
 
 ```python
@@ -1252,13 +1447,13 @@ def plot_training_history(history, model_name):
 set_seed()
 batch_size = 16
 model_nr = Sequential()
-model_nr.add(Conv2D(32, kernel_size=(3, 3), activation='relu', padding = 'Same', input_shape=(299, 299, 1)))
+model_nr.add(Conv2D(filters=32, kernel_size=(3, 3), activation='relu', padding='Same', input_shape=(299, 299, 1)))
 model_nr.add(MaxPooling2D(pool_size=(2, 2)))
-model_nr.add(Conv2D(64, kernel_size=(3, 3), padding = 'Same', activation='relu'))
+model_nr.add(Conv2D(filters=64, kernel_size=(3, 3), padding='Same', activation='relu'))
 model_nr.add(MaxPooling2D(pool_size=(2, 2)))
 model_nr.add(Flatten())
-model_nr.add(Dense(128, activation='relu'))
-model_nr.add(Dense(num_classes, activation='softmax'))
+model_nr.add(Dense(units=128, activation='relu'))
+model_nr.add(Dense(units=num_classes, activation='softmax'))
 
 ##################################
 # Compiling the network layers
@@ -1401,7 +1596,7 @@ model_nr_history = model_nr.fit(train_gen,
 model_nr_y_pred = model_nr.predict(test_gen)
 ```
 
-    45/45 [==============================] - 3s 73ms/step
+    45/45 [==============================] - 4s 81ms/step
     
 
 
@@ -1416,7 +1611,7 @@ plot_training_history(model_nr_history, 'CNN With No Regularization : ')
 
 
     
-![png](output_68_0.png)
+![png](output_71_0.png)
     
 
 
@@ -1458,7 +1653,7 @@ keras.backend.clear_session()
 
 
     
-![png](output_69_0.png)
+![png](output_72_0.png)
     
 
 
@@ -1590,10 +1785,66 @@ model_nr_all_summary = pd.DataFrame(zip(model_nr_model_list,
 
 ### 1.6.3 CNN With Dropout Regularization <a class="anchor" id="1.6.3"></a>
 
-1. Details
-    * 1.1 Details
-        * 1.1.1 Details
-            * 1.1.1.1 Details    
+1. The [convolutional neural network model](https://www.tensorflow.org/api_docs/python/tf/keras/models) from the <mark style="background-color: #CCECFF"><b>keras.models</b></mark> Python library API was implemented. 
+2. The model contains 8 layers with fixed hyperparameters as follows:
+    * <span style="color: #FF0000">Conv2D: conv2d</span>
+        * <span style="color: #FF0000">filters</span> = 32
+        * <span style="color: #FF0000">kernel_size</span> = 3x3
+        * <span style="color: #FF0000">activation</span> = relu (rectified linear unit)
+        * <span style="color: #FF0000">padding</span> = same (output size equals input size)
+        * <span style="color: #FF0000">input_shape</span> = 299x299x1
+    * <span style="color: #FF0000">MaxPooling2D: max_pooling2d</span>
+        * <span style="color: #FF0000">pool_size</span> = 2x2
+    * <span style="color: #FF0000">Conv2D: conv2d_1</span>
+        * <span style="color: #FF0000">filters</span> = 64
+        * <span style="color: #FF0000">kernel_size</span> = 3x3
+        * <span style="color: #FF0000">activation</span> = relu (rectified linear unit)
+        * <span style="color: #FF0000">padding</span> = same (output size equals input size)
+    * <span style="color: #FF0000">Dropout: dropout</span>
+        * <span style="color: #FF0000">rate</span> = 0.25
+    * <span style="color: #FF0000">MaxPooling2D: max_pooling2d_1</span>
+        * <span style="color: #FF0000">pool_size</span> = 2x2
+    * <span style="color: #FF0000">Flatten: flatten</span>
+    * <span style="color: #FF0000">Dense: dense</span>
+        * <span style="color: #FF0000">units</span> = 128
+        * <span style="color: #FF0000">activation</span> = relu (rectified linear unit)
+    * <span style="color: #FF0000">Dense: dense_1</span>
+        * <span style="color: #FF0000">units</span> = 3
+        * <span style="color: #FF0000">activation</span> = softmax
+3. Additional fixed hyperparameters used during model compilation are as follows:
+    * <span style="color: #FF0000">loss</span> = categorical_crossentropy
+    * <span style="color: #FF0000">optimizer</span> = adam (adaptive moment estimation)
+    * <span style="color: #FF0000">metrics</span> = recall
+4. The model contained 44,878,723 trainable parameters broken down per layer as follows:
+    * <span style="color: #FF0000">Conv2D: conv2d</span>
+        * output size = 299x299x32
+        * number of parameters = 320
+    * <span style="color: #FF0000">MaxPooling2D: max_pooling2d</span>
+        * output size = 149x149x32
+        * number of parameters = 0
+    * <span style="color: #FF0000">Dropout: dropout</span>
+        * output size = 149x149x64
+        * number of parameters = 0 
+    * <span style="color: #FF0000">Conv2D: conv2d_1</span>
+        * output size = 149x149x64
+        * number of parameters = 18496 
+    * <span style="color: #FF0000">MaxPooling2D: max_pooling2d_1</span>
+        * output size = 74x74x64
+        * number of parameters = 0
+    * <span style="color: #FF0000">Flatten: flatten</span>
+        * output size = 350464
+        * number of parameters = 0
+    * <span style="color: #FF0000">Dense: dense</span>
+        * output size = 128
+        * number of parameters = 44859520
+    * <span style="color: #FF0000">Dense: dense_1</span>
+        * output size = 3
+        * number of parameters = 387
+5. The model performance on the validation set for all image categories is summarized as follows:
+    * **Precision** = 0.8565
+    * **Recall** = 0.8472
+    * **F1 Score** = 0.8457
+    
 
 
 ```python
@@ -1604,14 +1855,14 @@ model_nr_all_summary = pd.DataFrame(zip(model_nr_model_list,
 set_seed()
 batch_size = 16
 model_dr = Sequential()
-model_dr.add(Conv2D(32, kernel_size=(3, 3), activation='relu', padding = 'Same', input_shape=(299, 299, 1)))
+model_dr.add(Conv2D(filters=32, kernel_size=(3, 3), activation='relu', padding='Same', input_shape=(299, 299, 1)))
 model_dr.add(MaxPooling2D(pool_size=(2, 2)))
-model_dr.add(Conv2D(64, kernel_size=(3, 3), padding = 'Same', activation='relu'))
-model_dr.add(Dropout(0.25))
+model_dr.add(Conv2D(filters=64, kernel_size=(3, 3), padding = 'Same', activation='relu'))
+model_dr.add(Dropout(rate=0.25))
 model_dr.add(MaxPooling2D(pool_size=(2, 2)))
 model_dr.add(Flatten())
-model_dr.add(Dense(128, activation='relu'))
-model_dr.add(Dense(num_classes, activation='softmax'))
+model_dr.add(Dense(units=128, activation='relu'))
+model_dr.add(Dense(units=num_classes, activation='softmax'))
 
 ##################################
 # Compiling the network layers
@@ -1761,7 +2012,7 @@ plot_training_history(model_dr_history, 'CNN With Dropout Regularization : ')
 
 
     
-![png](output_80_0.png)
+![png](output_83_0.png)
     
 
 
@@ -1804,7 +2055,7 @@ keras.backend.clear_session()
 
 
     
-![png](output_81_0.png)
+![png](output_84_0.png)
     
 
 
@@ -1936,10 +2187,70 @@ model_dr_all_summary = pd.DataFrame(zip(model_dr_model_list,
 
 ### 1.6.4 CNN With Batch Normalization Regularization <a class="anchor" id="1.6.4"></a>
 
-1. Details
-    * 1.1 Details
-        * 1.1.1 Details
-            * 1.1.1.1 Details  
+1. The [convolutional neural network model](https://www.tensorflow.org/api_docs/python/tf/keras/models) from the <mark style="background-color: #CCECFF"><b>keras.models</b></mark> Python library API was implemented. 
+2. The model contains 9 layers with fixed hyperparameters as follows:
+    * <span style="color: #FF0000">Conv2D: conv2d</span>
+        * <span style="color: #FF0000">filters</span> = 32
+        * <span style="color: #FF0000">kernel_size</span> = 3x3
+        * <span style="color: #FF0000">activation</span> = relu (rectified linear unit)
+        * <span style="color: #FF0000">padding</span> = same (output size equals input size)
+        * <span style="color: #FF0000">input_shape</span> = 299x299x1
+    * <span style="color: #FF0000">MaxPooling2D: max_pooling2d</span>
+        * <span style="color: #FF0000">pool_size</span> = 2x2
+    * <span style="color: #FF0000">Conv2D: conv2d_1</span>
+        * <span style="color: #FF0000">filters</span> = 64
+        * <span style="color: #FF0000">kernel_size</span> = 3x3
+        * <span style="color: #FF0000">activation</span> = relu (rectified linear unit)
+        * <span style="color: #FF0000">padding</span> = same (output size equals input size)
+    * <span style="color: #FF0000">BatchNormalization: batch_normalization</span>
+    * <span style="color: #FF0000">Activation: activation</span>
+        * <span style="color: #FF0000">activation</span> = relu (rectified linear unit)
+    * <span style="color: #FF0000">MaxPooling2D: max_pooling2d_1</span>
+        * <span style="color: #FF0000">pool_size</span> = 2x2
+    * <span style="color: #FF0000">Flatten: flatten</span>
+    * <span style="color: #FF0000">Dense: dense</span>
+        * <span style="color: #FF0000">units</span> = 128
+        * <span style="color: #FF0000">activation</span> = relu (rectified linear unit)
+    * <span style="color: #FF0000">Dense: dense_1</span>
+        * <span style="color: #FF0000">units</span> = 3
+        * <span style="color: #FF0000">activation</span> = softmax
+3. Additional fixed hyperparameters used during model compilation are as follows:
+    * <span style="color: #FF0000">loss</span> = categorical_crossentropy
+    * <span style="color: #FF0000">optimizer</span> = adam (adaptive moment estimation)
+    * <span style="color: #FF0000">metrics</span> = recall
+4. The model contained 44,878,979 trainable parameters broken down per layer as follows:
+    * <span style="color: #FF0000">Conv2D: conv2d</span>
+        * output size = 299x299x32
+        * number of parameters = 320
+    * <span style="color: #FF0000">MaxPooling2D: max_pooling2d</span>
+        * output size = 149x149x32
+        * number of parameters = 0
+    * <span style="color: #FF0000">BatchNormalization: batch_normalization</span>
+        * output size = 149x149x64
+        * number of parameters = 256
+    * <span style="color: #FF0000">Activation: activation</span>
+        * output size = 149x149x64
+        * number of parameters = 0 
+    * <span style="color: #FF0000">Conv2D: conv2d_1</span>
+        * output size = 149x149x64
+        * number of parameters = 18496 
+    * <span style="color: #FF0000">MaxPooling2D: max_pooling2d_1</span>
+        * output size = 74x74x64
+        * number of parameters = 0
+    * <span style="color: #FF0000">Flatten: flatten</span>
+        * output size = 350464
+        * number of parameters = 0
+    * <span style="color: #FF0000">Dense: dense</span>
+        * output size = 128
+        * number of parameters = 44859520
+    * <span style="color: #FF0000">Dense: dense_1</span>
+        * output size = 3
+        * number of parameters = 387
+5. The model performance on the validation set for all image categories is summarized as follows:
+    * **Precision** = 0.9111
+    * **Recall** = 0.9097
+    * **F1 Score** = 0.9097
+    
 
 
 ```python
@@ -1950,15 +2261,15 @@ model_dr_all_summary = pd.DataFrame(zip(model_dr_model_list,
 set_seed()
 batch_size = 16
 model_bnr = Sequential()
-model_bnr.add(Conv2D(32, kernel_size=(3, 3), activation='relu', padding = 'Same', input_shape=(299, 299, 1)))
+model_bnr.add(Conv2D(filters=32, kernel_size=(3, 3), activation='relu', padding='Same', input_shape=(299, 299, 1)))
 model_bnr.add(MaxPooling2D(pool_size=(2, 2)))
-model_bnr.add(Conv2D(64, kernel_size=(3, 3), padding = 'Same', activation='relu'))
+model_bnr.add(Conv2D(filters=64, kernel_size=(3, 3), padding='Same', activation='relu'))
 model_bnr.add(BatchNormalization())
 model_bnr.add(Activation('relu'))
 model_bnr.add(MaxPooling2D(pool_size=(2, 2)))
 model_bnr.add(Flatten())
-model_bnr.add(Dense(128, activation='relu'))
-model_bnr.add(Dense(num_classes, activation='softmax'))
+model_bnr.add(Dense(units=128, activation='relu'))
+model_bnr.add(Dense(units=num_classes, activation='softmax'))
 
 ##################################
 # Compiling the network layers
@@ -2112,7 +2423,7 @@ plot_training_history(model_bnr_history, 'CNN With Batch Normalization Regulariz
 
 
     
-![png](output_92_0.png)
+![png](output_95_0.png)
     
 
 
@@ -2155,7 +2466,7 @@ keras.backend.clear_session()
 
 
     
-![png](output_93_0.png)
+![png](output_96_0.png)
     
 
 
@@ -2287,10 +2598,75 @@ model_bnr_all_summary = pd.DataFrame(zip(model_bnr_model_list,
 
 ### 1.6.5 CNN With Dropout and Batch Normalization Regularization <a class="anchor" id="1.6.5"></a>
 
-1. Details
-    * 1.1 Details
-        * 1.1.1 Details
-            * 1.1.1.1 Details      
+1. The [convolutional neural network model](https://www.tensorflow.org/api_docs/python/tf/keras/models) from the <mark style="background-color: #CCECFF"><b>keras.models</b></mark> Python library API was implemented. 
+2. The model contains 10 layers with fixed hyperparameters as follows:
+    * <span style="color: #FF0000">Conv2D: conv2d</span>
+        * <span style="color: #FF0000">filters</span> = 32
+        * <span style="color: #FF0000">kernel_size</span> = 3x3
+        * <span style="color: #FF0000">activation</span> = relu (rectified linear unit)
+        * <span style="color: #FF0000">padding</span> = same (output size equals input size)
+        * <span style="color: #FF0000">input_shape</span> = 299x299x1
+    * <span style="color: #FF0000">MaxPooling2D: max_pooling2d</span>
+        * <span style="color: #FF0000">pool_size</span> = 2x2
+    * <span style="color: #FF0000">Conv2D: conv2d_1</span>
+        * <span style="color: #FF0000">filters</span> = 64
+        * <span style="color: #FF0000">kernel_size</span> = 3x3
+        * <span style="color: #FF0000">activation</span> = relu (rectified linear unit)
+        * <span style="color: #FF0000">padding</span> = same (output size equals input size)
+    * <span style="color: #FF0000">BatchNormalization: batch_normalization</span>
+    * <span style="color: #FF0000">Activation: activation</span>
+        * <span style="color: #FF0000">activation</span> = relu (rectified linear unit)
+    * <span style="color: #FF0000">Dropout: dropout</span>
+        * <span style="color: #FF0000">rate</span> = 0.25
+    * <span style="color: #FF0000">MaxPooling2D: max_pooling2d_1</span>
+        * <span style="color: #FF0000">pool_size</span> = 2x2
+    * <span style="color: #FF0000">Flatten: flatten</span>
+    * <span style="color: #FF0000">Dense: dense</span>
+        * <span style="color: #FF0000">units</span> = 128
+        * <span style="color: #FF0000">activation</span> = relu (rectified linear unit)
+    * <span style="color: #FF0000">Dense: dense_1</span>
+        * <span style="color: #FF0000">units</span> = 3
+        * <span style="color: #FF0000">activation</span> = softmax
+3. Additional fixed hyperparameters used during model compilation are as follows:
+    * <span style="color: #FF0000">loss</span> = categorical_crossentropy
+    * <span style="color: #FF0000">optimizer</span> = adam (adaptive moment estimation)
+    * <span style="color: #FF0000">metrics</span> = recall
+4. The model contained 44,878,979 trainable parameters broken down per layer as follows:
+    * <span style="color: #FF0000">Conv2D: conv2d</span>
+        * output size = 299x299x32
+        * number of parameters = 320
+    * <span style="color: #FF0000">MaxPooling2D: max_pooling2d</span>
+        * output size = 149x149x32
+        * number of parameters = 0
+    * <span style="color: #FF0000">BatchNormalization: batch_normalization</span>
+        * output size = 149x149x64
+        * number of parameters = 256
+    * <span style="color: #FF0000">Activation: activation</span>
+        * output size = 149x149x64
+        * number of parameters = 0 
+    * <span style="color: #FF0000">Dropout: dropout</span>
+        * output size = 149x149x64
+        * number of parameters = 0 
+    * <span style="color: #FF0000">Conv2D: conv2d_1</span>
+        * output size = 149x149x64
+        * number of parameters = 18496 
+    * <span style="color: #FF0000">MaxPooling2D: max_pooling2d_1</span>
+        * output size = 74x74x64
+        * number of parameters = 0
+    * <span style="color: #FF0000">Flatten: flatten</span>
+        * output size = 350464
+        * number of parameters = 0
+    * <span style="color: #FF0000">Dense: dense</span>
+        * output size = 128
+        * number of parameters = 44859520
+    * <span style="color: #FF0000">Dense: dense_1</span>
+        * output size = 3
+        * number of parameters = 387
+5. The model performance on the validation set for all classes is summarized as follows:
+    * **Precision** = 0.8842
+    * **Recall** = 0.8736
+    * **F1 Score** = 0.8744
+    
 
 
 ```python
@@ -2301,16 +2677,16 @@ model_bnr_all_summary = pd.DataFrame(zip(model_bnr_model_list,
 set_seed()
 batch_size = 16
 model_dr_bnr = Sequential()
-model_dr_bnr.add(Conv2D(32, kernel_size=(3, 3), activation='relu', padding = 'Same', input_shape=(299, 299, 1)))
+model_dr_bnr.add(Conv2D(filters=32, kernel_size=(3, 3), activation='relu', padding='Same', input_shape=(299, 299, 1)))
 model_dr_bnr.add(MaxPooling2D(pool_size=(2, 2)))
-model_dr_bnr.add(Conv2D(64, kernel_size=(3, 3), padding = 'Same', activation='relu'))
+model_dr_bnr.add(Conv2D(filters=64, kernel_size=(3, 3), padding='Same', activation='relu'))
 model_dr_bnr.add(BatchNormalization())
 model_dr_bnr.add(Activation('relu'))
 model_dr_bnr.add(Dropout(0.25))
 model_dr_bnr.add(MaxPooling2D(pool_size=(2, 2)))
 model_dr_bnr.add(Flatten())
-model_dr_bnr.add(Dense(128, activation='relu'))
-model_dr_bnr.add(Dense(num_classes, activation='softmax'))
+model_dr_bnr.add(Dense(units=128, activation='relu'))
+model_dr_bnr.add(Dense(units=num_classes, activation='softmax'))
 
 ##################################
 # Compiling the network layers
@@ -2458,7 +2834,7 @@ model_dr_bnr_history = model_dr_bnr.fit(train_gen,
 model_dr_bnr_y_pred = model_dr_bnr.predict(test_gen)
 ```
 
-    45/45 [==============================] - 4s 91ms/step
+    45/45 [==============================] - 4s 85ms/step
     
 
 
@@ -2474,7 +2850,7 @@ plot_training_history(model_dr_bnr_history, 'CNN With Dropout and Batch Normaliz
 
 
     
-![png](output_104_0.png)
+![png](output_107_0.png)
     
 
 
@@ -2520,7 +2896,7 @@ keras.backend.clear_session()
 
 
     
-![png](output_105_0.png)
+![png](output_108_0.png)
     
 
 
@@ -2658,10 +3034,32 @@ model_dr_bnr_all_summary = pd.DataFrame(zip(model_dr_bnr_model_list,
 
 ## 1.7. Consolidated Findings <a class="anchor" id="1.7"></a>
 
-1. Details
-    * 1.1 Details
-        * 1.1.1 Details
-            * 1.1.1.1 Details         
+1. The **CNN Model With No Regularization** demonstrated the following validation set performance for all image categories:
+    * **Precision** = 0.7906
+    * **Recall** = 0.7819
+    * **F1 Score** = 0.7825      
+2. The **CNN Model With Dropout Regularization** demonstrated the following validation set performance for all image categories:
+    * **Precision** = 0.8565
+    * **Recall** = 0.8472
+    * **F1 Score** = 0.8457
+3. The **CNN Model With Batch Normalization Regularization** demonstrated the following validation set performance for all image categories:
+    * **Precision** = 0.9111
+    * **Recall** = 0.9097
+    * **F1 Score** = 0.9097
+4. The **CNN Model With Dropout and Batch Normalization Regularization** demonstrated the following validation set performance for all image categories:
+    * **Precision** = 0.8842
+    * **Recall** = 0.8736
+    * **F1 Score** = 0.8744
+5. The **CNN Model With Batch Normalization Regularization** had the best validation set performance and was selected among all candidate models.
+    * **Precision** = 0.9111
+    * **Recall** = 0.9097
+    * **F1 Score** = 0.9097
+6. While the classification results have been sufficiently high, the current study can be further extended to achieve optimal model performance through the following:
+    * Conduct model hyperparameter tuning given sufficient analysis time and higher computing power
+    * Formulate deeper neural network architectures to better capture spatial hierarchies and features in the input images
+    * Apply various techniques to interpret the CNN models by understanding and visualizing the features and decisions made at each layer 
+    * Consider an imbalanced dataset and apply remedial measures to address unbalanced classification to accurately reflect real-world scenario
+    
 
 
 ```python
@@ -2786,7 +3184,7 @@ for container in cnn_model_performance_comparison_precision_plot.containers:
 
 
     
-![png](output_112_0.png)
+![png](output_115_0.png)
     
 
 
@@ -2900,7 +3298,7 @@ for container in cnn_model_performance_comparison_recall_plot.containers:
 
 
     
-![png](output_115_0.png)
+![png](output_118_0.png)
     
 
 
@@ -3014,7 +3412,7 @@ for container in cnn_model_performance_comparison_fscore_plot.containers:
 
 
     
-![png](output_118_0.png)
+![png](output_121_0.png)
     
 
 
