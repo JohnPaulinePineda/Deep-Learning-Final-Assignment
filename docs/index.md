@@ -2,7 +2,7 @@
 # Supervised Learning : Convolutional Neural Network Frameworks for Multi-Class Image Classification
 
 ***
-### John Pauline Pineda <br> <br> *December 30, 2023*
+### John Pauline Pineda <br> <br> *December 25, 2023*
 ***
 
 * [**1. Table of Contents**](#TOC)
@@ -1038,17 +1038,17 @@ plt.show()
 
 1. Distinct patterns were observed between the image categories.
     * 1.1 Images identified with <span style="color: #FF0000">CLASS: COVID</span> had the following characteristics:
-        * 1.1.1 Higher mean pixel values indicating generally with more lighter images
+        * 1.1.1 Higher mean pixel values indicating generally lighter images
         * 1.1.2 Bimodal and wider distribution of maximum pixel values indicating a higher variation in highest possible values
         * 1.1.3 Wider range of image pixel standard deviation indicating a higher variation in contrast
     * 1.2 Images identified with <span style="color: #FF0000">CLASS: Viral Pneumonia</span> had the following characteristics:
-        * 1.2.1 Higher mean pixel values indicating generally with more lighter images
+        * 1.2.1 Higher mean pixel values indicating generally lighter images
         * 1.2.2 Bimodal and wider distribution of maximum pixel values indicating a higher variation in highest possible values
         * 1.2.3 Wider range of image pixel standard deviation indicating a higher variation in contrast
     * 1.3 Images identified with <span style="color: #FF0000">CLASS: Normal</span> had the following characteristics:
-        * 1.3.1 Lower mean pixel values indicating generally with less lighter images
+        * 1.3.1 Lower mean pixel values indicating generally darker images
         * 1.3.2 Unimodal and steeper distribution of maximum pixel values indicating more stable highest possible values
-        * 1.3.3 Compact range of image pixel standard deviation indicating images with sufficient contrast
+        * 1.3.3 Compact range of image pixel standard deviation indicating images with stable and sufficient contrast
 
 
 ```python
@@ -1596,7 +1596,7 @@ model_nr_history = model_nr.fit(train_gen,
 model_nr_y_pred = model_nr.predict(test_gen)
 ```
 
-    45/45 [==============================] - 4s 81ms/step
+    45/45 [==============================] - 4s 80ms/step
     
 
 
@@ -1997,7 +1997,7 @@ model_dr_history = model_dr.fit(train_gen,
 model_dr_y_pred = model_dr.predict(test_gen)
 ```
 
-    45/45 [==============================] - 4s 77ms/step
+    45/45 [==============================] - 4s 79ms/step
     
 
 
@@ -2408,7 +2408,7 @@ model_bnr_history = model_bnr.fit(train_gen,
 model_bnr_y_pred = model_bnr.predict(test_gen)
 ```
 
-    45/45 [==============================] - 4s 84ms/step
+    45/45 [==============================] - 4s 92ms/step
     
 
 
@@ -2834,7 +2834,7 @@ model_dr_bnr_history = model_dr_bnr.fit(train_gen,
 model_dr_bnr_y_pred = model_dr_bnr.predict(test_gen)
 ```
 
-    45/45 [==============================] - 4s 85ms/step
+    45/45 [==============================] - 4s 97ms/step
     
 
 
@@ -3082,7 +3082,7 @@ cnn_model_performance_comparison = pd.concat([model_nr_all_summary,
 ##################################
 cnn_model_performance_comparison_precision = cnn_model_performance_comparison[cnn_model_performance_comparison['Model.Metric']=='Precision']
 cnn_model_performance_comparison_precision_CNN_NR = cnn_model_performance_comparison_precision[cnn_model_performance_comparison_precision['CNN.Model.Name']=='CNN_NR'].loc[:,"Metric.Value"]
-cnn_model_performance_comparison_precision_CNN_BR = cnn_model_performance_comparison_precision[cnn_model_performance_comparison_precision['CNN.Model.Name']=='CNN_DR'].loc[:,"Metric.Value"]
+cnn_model_performance_comparison_precision_CNN_DR = cnn_model_performance_comparison_precision[cnn_model_performance_comparison_precision['CNN.Model.Name']=='CNN_DR'].loc[:,"Metric.Value"]
 cnn_model_performance_comparison_precision_CNN_BNR = cnn_model_performance_comparison_precision[cnn_model_performance_comparison_precision['CNN.Model.Name']=='CNN_BNR'].loc[:,"Metric.Value"]
 cnn_model_performance_comparison_precision_CNN_DR_BNR = cnn_model_performance_comparison_precision[cnn_model_performance_comparison_precision['CNN.Model.Name']=='CNN_DR_BNR'].loc[:,"Metric.Value"]
 ```
@@ -3095,7 +3095,7 @@ cnn_model_performance_comparison_precision_CNN_DR_BNR = cnn_model_performance_co
 # for all CNN models
 ##################################
 cnn_model_performance_comparison_precision_plot = pd.DataFrame({'CNN_NR': cnn_model_performance_comparison_precision_CNN_NR.values,
-                                                                'CNN_BR': cnn_model_performance_comparison_precision_CNN_BR.values,
+                                                                'CNN_DR': cnn_model_performance_comparison_precision_CNN_DR.values,
                                                                 'CNN_BNR': cnn_model_performance_comparison_precision_CNN_BNR.values,
                                                                 'CNN_DR_BNR': cnn_model_performance_comparison_precision_CNN_DR_BNR.values},
                                                                index=cnn_model_performance_comparison_precision['Image.Category'].unique())
@@ -3124,7 +3124,7 @@ cnn_model_performance_comparison_precision_plot
     <tr style="text-align: right;">
       <th></th>
       <th>CNN_NR</th>
-      <th>CNN_BR</th>
+      <th>CNN_DR</th>
       <th>CNN_BNR</th>
       <th>CNN_DR_BNR</th>
     </tr>
@@ -3196,7 +3196,7 @@ for container in cnn_model_performance_comparison_precision_plot.containers:
 ##################################
 cnn_model_performance_comparison_recall = cnn_model_performance_comparison[cnn_model_performance_comparison['Model.Metric']=='Recall']
 cnn_model_performance_comparison_recall_CNN_NR = cnn_model_performance_comparison_recall[cnn_model_performance_comparison_recall['CNN.Model.Name']=='CNN_NR'].loc[:,"Metric.Value"]
-cnn_model_performance_comparison_recall_CNN_BR = cnn_model_performance_comparison_recall[cnn_model_performance_comparison_recall['CNN.Model.Name']=='CNN_DR'].loc[:,"Metric.Value"]
+cnn_model_performance_comparison_recall_CNN_DR = cnn_model_performance_comparison_recall[cnn_model_performance_comparison_recall['CNN.Model.Name']=='CNN_DR'].loc[:,"Metric.Value"]
 cnn_model_performance_comparison_recall_CNN_BNR = cnn_model_performance_comparison_recall[cnn_model_performance_comparison_recall['CNN.Model.Name']=='CNN_BNR'].loc[:,"Metric.Value"]
 cnn_model_performance_comparison_recall_CNN_DR_BNR = cnn_model_performance_comparison_recall[cnn_model_performance_comparison_recall['CNN.Model.Name']=='CNN_DR_BNR'].loc[:,"Metric.Value"]
 ```
@@ -3209,7 +3209,7 @@ cnn_model_performance_comparison_recall_CNN_DR_BNR = cnn_model_performance_compa
 # for all CNN models
 ##################################
 cnn_model_performance_comparison_recall_plot = pd.DataFrame({'CNN_NR': cnn_model_performance_comparison_recall_CNN_NR.values,
-                                                             'CNN_BR': cnn_model_performance_comparison_recall_CNN_BR.values,
+                                                             'CNN_DR': cnn_model_performance_comparison_recall_CNN_DR.values,
                                                              'CNN_BNR': cnn_model_performance_comparison_recall_CNN_BNR.values,
                                                              'CNN_DR_BNR': cnn_model_performance_comparison_recall_CNN_DR_BNR.values},
                                                             index=cnn_model_performance_comparison_recall['Image.Category'].unique())
@@ -3238,7 +3238,7 @@ cnn_model_performance_comparison_recall_plot
     <tr style="text-align: right;">
       <th></th>
       <th>CNN_NR</th>
-      <th>CNN_BR</th>
+      <th>CNN_DR</th>
       <th>CNN_BNR</th>
       <th>CNN_DR_BNR</th>
     </tr>
@@ -3310,7 +3310,7 @@ for container in cnn_model_performance_comparison_recall_plot.containers:
 ##################################
 cnn_model_performance_comparison_fscore = cnn_model_performance_comparison[cnn_model_performance_comparison['Model.Metric']=='F-Score']
 cnn_model_performance_comparison_fscore_CNN_NR = cnn_model_performance_comparison_fscore[cnn_model_performance_comparison_fscore['CNN.Model.Name']=='CNN_NR'].loc[:,"Metric.Value"]
-cnn_model_performance_comparison_fscore_CNN_BR = cnn_model_performance_comparison_fscore[cnn_model_performance_comparison_fscore['CNN.Model.Name']=='CNN_DR'].loc[:,"Metric.Value"]
+cnn_model_performance_comparison_fscore_CNN_DR = cnn_model_performance_comparison_fscore[cnn_model_performance_comparison_fscore['CNN.Model.Name']=='CNN_DR'].loc[:,"Metric.Value"]
 cnn_model_performance_comparison_fscore_CNN_BNR = cnn_model_performance_comparison_fscore[cnn_model_performance_comparison_fscore['CNN.Model.Name']=='CNN_BNR'].loc[:,"Metric.Value"]
 cnn_model_performance_comparison_fscore_CNN_DR_BNR = cnn_model_performance_comparison_fscore[cnn_model_performance_comparison_fscore['CNN.Model.Name']=='CNN_DR_BNR'].loc[:,"Metric.Value"]
 ```
@@ -3323,7 +3323,7 @@ cnn_model_performance_comparison_fscore_CNN_DR_BNR = cnn_model_performance_compa
 # for all CNN models
 ##################################
 cnn_model_performance_comparison_fscore_plot = pd.DataFrame({'CNN_NR': cnn_model_performance_comparison_fscore_CNN_NR.values,
-                                                             'CNN_BR': cnn_model_performance_comparison_fscore_CNN_BR.values,
+                                                             'CNN_DR': cnn_model_performance_comparison_fscore_CNN_DR.values,
                                                              'CNN_BNR': cnn_model_performance_comparison_fscore_CNN_BNR.values,
                                                              'CNN_DR_BNR': cnn_model_performance_comparison_fscore_CNN_DR_BNR.values},
                                                             index=cnn_model_performance_comparison_fscore['Image.Category'].unique())
@@ -3352,7 +3352,7 @@ cnn_model_performance_comparison_fscore_plot
     <tr style="text-align: right;">
       <th></th>
       <th>CNN_NR</th>
-      <th>CNN_BR</th>
+      <th>CNN_DR</th>
       <th>CNN_BNR</th>
       <th>CNN_DR_BNR</th>
     </tr>
@@ -3418,78 +3418,28 @@ for container in cnn_model_performance_comparison_fscore_plot.containers:
 
 # 2. Summary <a class="anchor" id="Summary"></a>
 
-A detailed [report](https://github.com/JohnPaulinePineda/Unsupervised-Machine-Learning-Final-Assignment/blob/main/UnsupervisedMachineLearningCapstone_JohnPaulinePineda.pdf) was formulated documenting all the analysis steps and findings.
+A detailed [report](https://github.com/JohnPaulinePineda/Deep-Learning-Final-Assignment/blob/main/DeepLearningClassificationCapstone_JohnPaulinePineda.pdf) was formulated documenting all the analysis steps and findings.
 
 
+![DeepLearningProject_Introduction.png](attachment:defaf72a-9c26-49c1-a480-87034d89c9ca.png)
 
-```python
-##################################
-# Introduction
-##################################
-```
+![DeepLearning_Methodology.png](attachment:9f901e9a-bb14-4a52-831f-a6e1cc9b653a.png)
 
+![DeepLearning_DataGathering.png](attachment:bf25babe-fa63-4fd9-8b2e-4fc638795250.png)
 
-```python
-##################################
-# Methodology
-##################################
-```
+![DeepLearning_DataDescription.png](attachment:048015e7-0502-456f-852b-2885fb325e4f.png)
 
+![DeepLearning_DataPreprocessing.png](attachment:3bf36c4d-20da-4e7a-93ee-2ff73e76baae.png)
 
-```python
-##################################
-# Data Gathering
-##################################
-```
+![DeepLearning_DataExploration.png](attachment:1f9581f7-08e5-4136-bb0b-e9fb6b1291ce.png)
 
+![DeepLearning_ModelDevelopment.png](attachment:1c25537e-c9c9-4610-94fe-6319c17f1bee.png)
 
-```python
-##################################
-# Data Description
-##################################
-```
+![DeepLearning_ModelValidation.png](attachment:d683d084-86a4-47d5-8f4c-425207c3272d.png)
 
+![DeepLearning_ModelSelection.png](attachment:976d76b3-4af5-406d-b44b-c3debf6523f1.png)
 
-```python
-##################################
-# Data Quality Assessment
-##################################
-```
-
-
-```python
-##################################
-# Data Preprocessing
-##################################
-```
-
-
-```python
-##################################
-# Data Exploration
-##################################
-```
-
-
-```python
-##################################
-# Model Development
-##################################
-```
-
-
-```python
-##################################
-# Overall Findings and Implications
-##################################
-```
-
-
-```python
-##################################
-# Conclusions
-##################################
-```
+![DeepLearning_Conclusion.png](attachment:9e6e5c10-c48c-4fbc-b75e-bc9178faed6e.png)
 
 # 3. References <a class="anchor" id="References"></a>
 * **[Book]** [Deep Learning with Python](https://www.manning.com/books/deep-learning-with-python) by Francois Chollet
