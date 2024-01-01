@@ -28,7 +28,7 @@
 
 # 1. Table of Contents <a class="anchor" id="TOC"></a>
 
-This project explores the various convolutional neural network (CNN) frameworks for processeing images through convolutional, activation, pooling, and fully connected layers, capturing hierarchical features and learning to map input images to their respective classes during training using various helpful packages in <mark style="background-color: #CCECFF"><b>Python</b></mark>. Various CNN architectures applied in the analysis to learn features and patterns at different levels of abstraction in images included **CNN Without Regularization**, **CNN With Dropout Regularization**, **CNN With Batch Normalization Regularization** and **CNN With Dropout and Batch Normalization Regularization**. The different CNN algorithms were evaluated using the categorical cross entropy loss which measures the difference between the predicted probability distribution and the true distribution of the class labels. Model multi-classification performance was measured using **Accuracy**, **Precision**, **Recall** and **F1 Score**. All results were consolidated in a [<span style="color: #FF0000"><b>Summary</b></span>](#Summary) presented at the end of the document.
+This project explores the various convolutional neural network (CNN) frameworks for processing images through convolutional, activation, pooling, and fully connected layers, capturing hierarchical features and learning to map input images to their respective classes during training using various helpful packages in <mark style="background-color: #CCECFF"><b>Python</b></mark>. Various CNN architectures applied in the analysis to learn features and patterns at different levels of abstraction in images included **CNN Without Regularization**, **CNN With Dropout Regularization**, **CNN With Batch Normalization Regularization** and **CNN With Dropout and Batch Normalization Regularization**. The different CNN algorithms were evaluated using the categorical cross entropy loss which measures the difference between the predicted probability distribution and the true distribution of the class labels. Model multi-classification performance was measured using **Precision**, **Recall** and **F1 Score**. All results were consolidated in a [<span style="color: #FF0000"><b>Summary</b></span>](#Summary) presented at the end of the document.
 
 A [convolutional neural network model](https://link.springer.com/book/10.1007/978-1-4614-6849-3?page=1) is a type of neural network architecture specifically designed for image classification and computer vision tasks by automatically learning hierarchical features directly from raw pixel data. The core building block of a CNN is the convolutional layer. Convolution operations apply learnable filters (kernels) to input images to detect patterns such as edges, textures, and more complex structures. The layers systematically learn hierarchical features from low-level (e.g., edges) to high-level (e.g., object parts) as the network deepens. Filters are shared across the entire input space, enabling the model to recognize patterns regardless of their spatial location. After convolutional operations, an activation function is applied element-wise to introduce non-linearity and allow the model to learn complex relationships between features. Pooling layers downsample the spatial dimensions of the feature maps, reducing the computational load and the number of parameters in the network - creating spatial hierarchy and translation invariance. Fully connected layers process the flattened features to make predictions and produce an output vector that corresponds to class probabilities using an activation function. The CNN is trained using backpropagation and optimization algorithms. A loss function is used to measure the difference between predicted and actual labels. The network adjusts its weights to minimize this loss. Gradients are calculated with respect to the loss, and the weights are updated accordingly through a backpropagation mechanism.
 
@@ -1596,7 +1596,7 @@ model_nr_history = model_nr.fit(train_gen,
 model_nr_y_pred = model_nr.predict(test_gen)
 ```
 
-    45/45 [==============================] - 4s 80ms/step
+    45/45 [==============================] - 3s 75ms/step
     
 
 
@@ -1997,7 +1997,7 @@ model_dr_history = model_dr.fit(train_gen,
 model_dr_y_pred = model_dr.predict(test_gen)
 ```
 
-    45/45 [==============================] - 4s 79ms/step
+    45/45 [==============================] - 4s 80ms/step
     
 
 
@@ -2408,7 +2408,7 @@ model_bnr_history = model_bnr.fit(train_gen,
 model_bnr_y_pred = model_bnr.predict(test_gen)
 ```
 
-    45/45 [==============================] - 4s 92ms/step
+    45/45 [==============================] - 5s 99ms/step
     
 
 
@@ -2834,7 +2834,7 @@ model_dr_bnr_history = model_dr_bnr.fit(train_gen,
 model_dr_bnr_y_pred = model_dr_bnr.predict(test_gen)
 ```
 
-    45/45 [==============================] - 4s 97ms/step
+    45/45 [==============================] - 4s 91ms/step
     
 
 
