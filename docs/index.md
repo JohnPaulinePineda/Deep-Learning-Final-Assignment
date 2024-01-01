@@ -1997,7 +1997,7 @@ model_dr_history = model_dr.fit(train_gen,
 model_dr_y_pred = model_dr.predict(test_gen)
 ```
 
-    45/45 [==============================] - 4s 80ms/step
+    45/45 [==============================] - 4s 85ms/step
     
 
 
@@ -2408,7 +2408,7 @@ model_bnr_history = model_bnr.fit(train_gen,
 model_bnr_y_pred = model_bnr.predict(test_gen)
 ```
 
-    45/45 [==============================] - 5s 99ms/step
+    45/45 [==============================] - 4s 96ms/step
     
 
 
@@ -2834,7 +2834,7 @@ model_dr_bnr_history = model_dr_bnr.fit(train_gen,
 model_dr_bnr_y_pred = model_dr_bnr.predict(test_gen)
 ```
 
-    45/45 [==============================] - 4s 91ms/step
+    45/45 [==============================] - 4s 90ms/step
     
 
 
@@ -3433,7 +3433,7 @@ A detailed [report](https://github.com/JohnPaulinePineda/Deep-Learning-Final-Ass
 
 ![DeepLearning_DataExploration.png](attachment:1f9581f7-08e5-4136-bb0b-e9fb6b1291ce.png)
 
-![DeepLearning_ModelDevelopment.png](attachment:1c25537e-c9c9-4610-94fe-6319c17f1bee.png)
+![DeepLearning_ModelDevelopment.png](attachment:78877e2d-1c3a-49f2-839c-aba1d8b52efc.png)
 
 ![DeepLearning_ModelValidation.png](attachment:d683d084-86a4-47d5-8f4c-425207c3272d.png)
 
